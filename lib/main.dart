@@ -1,13 +1,11 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:instagram_clone_1/screens/login_screen.dart';
 
-import 'package:instagram_clone_1/responsive/mobile_screen_layout.dart';
-import 'package:instagram_clone_1/responsive/responsive_layout_screen.dart';
-import 'package:instagram_clone_1/responsive/web_screen_layout.dart';
 import 'package:instagram_clone_1/utlis/colors.dart';
 
-Future main() async {
+main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (kIsWeb) {
     await Firebase.initializeApp(
@@ -35,12 +33,16 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData.dark()
-          .copyWith(scaffoldBackgroundColor: mobileBackgroundColor),
-      home: const ResponsiveLayoutScreen(
-        webScreenLayout: WebScreenLayout(),
-        mobileScreenLayout: MobileScreenLayout(),
-      ),
+      theme: ThemeData.dark().copyWith(
+          scaffoldBackgroundColor: mobileBackgroundColor,
+          snackBarTheme: const SnackBarThemeData(
+              backgroundColor: primaryColor,
+              actionTextColor: mobileBackgroundColor)),
+      // home: const ResponsiveLayoutScreen(
+      //   webScreenLayout: WebScreenLayout(),
+      //   mobileScreenLayout: MobileScreenLayout(),
+      // ),
+      home: const LoginScreen(),
       debugShowCheckedModeBanner: false,
     );
   }

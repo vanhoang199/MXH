@@ -1,21 +1,27 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:instagram_clone_1/resources/auth_methods.dart';
 import 'package:instagram_clone_1/utlis/colors.dart';
 import 'package:instagram_clone_1/utlis/logincode.dart';
 import 'package:instagram_clone_1/utlis/text_field_input.dart';
 import 'package:instagram_clone_1/utlis/utlis.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class SignupScreen extends StatefulWidget {
+  const SignupScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _userNameController = TextEditingController();
+  final TextEditingController _bioController = TextEditingController();
+  Uint8List? _img;
   bool _isLoading = false;
 
   @override
@@ -23,23 +29,54 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _userNameController.dispose();
+    _bioController.dispose();
   }
 
-  void loginUser() async {
+  void selectImage() async {
+    //TODO: Fix null full disk, ram  by image_picker readme
+
+    Uint8List? im;
+    if (kIsWeb) {
+      im = await pickImage(ImageSource.camera);
+    } else {
+      im = await pickImage(ImageSource.gallery);
+    }
+
+    if (im == null) {
+      print('Bộ nhớ đầy! Giải phóng các ứng dụng khác');
+      return;
+    }
+
+    setState(() {
+      _img = im;
+    });
+  }
+
+  void signUpUser() async {
     setState(() {
       _isLoading = true;
     });
 
-    String res = await AuthMethods().loginUser(
-      email: _emailController.text,
-      password: _passwordController.text,
-    );
+    //TODO: Setting img = default profile
+    if (_img == null) {
+      final ByteData bytes =
+          await rootBundle.load('assets/default_profile.png');
+      final Uint8List list = bytes.buffer.asUint8List();
+      _img = list;
+    }
 
-    if (res == Code().signUpSuccess) {
-      // showSnackBar(res, context);
-    } else {
+    String res = await AuthMethods().signUpUser(
+        username: _userNameController.text,
+        email: _emailController.text,
+        password: _passwordController.text,
+        bio: _bioController.text,
+        file: _img!);
+    //TODO: res -> const in folder
+    if (res != Code().signUpSuccess) {
       showSnackBar(res, context);
     }
+
     setState(() {
       _isLoading = false;
     });
@@ -67,9 +104,43 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(
                 height: 64,
               ),
+              Stack(
+                children: [
+                  _img != null
+                      ? CircleAvatar(
+                          radius: 64,
+                          backgroundImage: MemoryImage(_img!),
+                        )
+                      //ToDo: change to assests image
+                      : const CircleAvatar(
+                          radius: 64,
+                          backgroundImage:
+                              AssetImage('assets/default_profile.png'),
+                        ),
+                  Positioned(
+                    bottom: -10,
+                    left: 85,
+                    child: IconButton(
+                        onPressed: selectImage,
+                        icon: const Icon(Icons.add_a_photo)),
+                  )
+                ],
+              ),
+              const SizedBox(
+                height: 64,
+              ),
+              TextFieldInput(
+                textEditingController: _userNameController,
+                hintText: 'Nhập Tên',
+                textInputType: TextInputType.text,
+                isPass: false,
+              ),
+              const SizedBox(
+                height: 24,
+              ),
               TextFieldInput(
                 textEditingController: _emailController,
-                hintText: 'Điền email ',
+                hintText: 'Nhập email ',
                 textInputType: TextInputType.emailAddress,
               ),
               const SizedBox(
@@ -77,15 +148,24 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               TextFieldInput(
                 textEditingController: _passwordController,
-                hintText: 'Điền mật khẩu',
+                hintText: 'Nhập mật khẩu',
                 textInputType: TextInputType.text,
                 isPass: true,
               ),
               const SizedBox(
                 height: 24,
               ),
+              TextFieldInput(
+                textEditingController: _bioController,
+                hintText: 'Nhập Bio',
+                textInputType: TextInputType.text,
+                isPass: false,
+              ),
+              const SizedBox(
+                height: 24,
+              ),
               InkWell(
-                onTap: loginUser,
+                onTap: signUpUser,
                 child: _isLoading
                     ? const Center(
                         child: CircularProgressIndicator(
@@ -104,7 +184,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             color: blueColor),
                         child: const Text(
-                          'Đăng nhập',
+                          'Đăng kí',
                         ),
                       ),
               ),
@@ -120,14 +200,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: const Text('Bạn chưa có tài khoản? '),
+                    child: const Text('Bạn đã có tài khoản? '),
                   ),
                   GestureDetector(
                     onTap: () {},
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       child: const Text(
-                        'Đăng kí ngay',
+                        'Đăng nhập ngay',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                         ),
