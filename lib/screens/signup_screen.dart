@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:instagram_clone_1/resources/auth_methods.dart';
+import 'package:instagram_clone_1/screens/login_screen.dart';
 import 'package:instagram_clone_1/utlis/colors.dart';
 import 'package:instagram_clone_1/utlis/logincode.dart';
 import 'package:instagram_clone_1/utlis/text_field_input.dart';
@@ -75,11 +76,24 @@ class _SignupScreenState extends State<SignupScreen> {
     //TODO: res -> const in folder
     if (res != Code().signUpSuccess) {
       showSnackBar(res, context);
+    } else {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => const LoginScreen(),
+        ),
+      );
     }
-
     setState(() {
       _isLoading = false;
     });
+  }
+
+  void loginUser() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const LoginScreen(),
+      ),
+    );
   }
 
   @override
@@ -203,7 +217,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     child: const Text('Bạn đã có tài khoản? '),
                   ),
                   GestureDetector(
-                    onTap: () {},
+                    onTap: loginUser,
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       child: const Text(

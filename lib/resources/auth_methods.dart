@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:instagram_clone_1/models/user.dart' as model;
 import 'package:instagram_clone_1/resources/storage_method.dart';
 import 'package:instagram_clone_1/utlis/logincode.dart';
 
@@ -22,24 +23,27 @@ class AuthMethods {
           email.isNotEmpty ||
           password.isNotEmpty ||
           bio.isNotEmpty) {
-        UserCredential user = await _auth.createUserWithEmailAndPassword(
+        UserCredential cred = await _auth.createUserWithEmailAndPassword(
           email: email,
           password: password,
         );
-        print(user.user!.uid);
 
         String photoUrl = await StorageMethods()
-            .upLoadImageToStorage(user.user!.uid, file, false);
+            .upLoadImageToStorage(cred.user!.uid, file, false);
 
-        await _firestore.collection('users').doc(user.user!.uid).set({
-          'username': username,
-          'uid': user.user!.uid,
-          'email': email,
-          'bio': bio,
-          'followers': [],
-          'following': [],
-          'photoUrl': photoUrl,
-        });
+        model.User user = model.User(
+            username: username,
+            uid: cred.user!.uid,
+            email: email,
+            bio: bio,
+            photoUrl: photoUrl,
+            followers: [],
+            following: []);
+
+        await _firestore
+            .collection('users')
+            .doc(cred.user!.uid)
+            .set(user.toJson());
 
         // id auto increment
         // await _firestore.collection('users').add({
@@ -96,5 +100,14 @@ class AuthMethods {
       return res = e.toString();
     }
     return res;
+  }
+
+  //Try Catch => Tài khoản bị xóa trên storage, mất thông tin
+  Future<model.User> getUserDetails() async {
+    User currentUser = _auth.currentUser!;
+
+    DocumentSnapshot snapshot =
+        await _firestore.collection('users').doc(currentUser.uid).get();
+    return model.User.fromSnap(snapshot);
   }
 }

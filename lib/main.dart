@@ -1,9 +1,15 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:instagram_clone_1/providers/user_provider.dart';
+import 'package:instagram_clone_1/responsive/mobile_screen_layout.dart';
+import 'package:instagram_clone_1/responsive/responsive_layout_screen.dart';
+import 'package:instagram_clone_1/responsive/web_screen_layout.dart';
 import 'package:instagram_clone_1/screens/login_screen.dart';
 
 import 'package:instagram_clone_1/utlis/colors.dart';
+import 'package:provider/provider.dart';
 
 main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,19 +37,49 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData.dark().copyWith(
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => UserProvider(),
+        ),
+      ],
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData.dark().copyWith(
           scaffoldBackgroundColor: mobileBackgroundColor,
-          snackBarTheme: const SnackBarThemeData(
-              backgroundColor: primaryColor,
-              actionTextColor: mobileBackgroundColor)),
-      // home: const ResponsiveLayoutScreen(
-      //   webScreenLayout: WebScreenLayout(),
-      //   mobileScreenLayout: MobileScreenLayout(),
-      // ),
-      home: const LoginScreen(),
-      debugShowCheckedModeBanner: false,
+        ),
+        home: StreamBuilder(
+          // sign in + sign out
+          stream: FirebaseAuth.instance.authStateChanges(),
+          builder: ((context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.active) {
+              if (snapshot.hasData) {
+                return const ResponsiveLayoutScreen(
+                  webScreenLayout: WebScreenLayout(),
+                  mobileScreenLayout: MobileScreenLayout(),
+                );
+              } else if (snapshot.hasError) {
+                return Scaffold(
+                  body: Center(
+                    child: Text(snapshot.error.toString()),
+                  ),
+                );
+              }
+            } else if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Scaffold(
+                body: Center(
+                  child: CircularProgressIndicator(
+                    color: primaryColor,
+                  ),
+                ),
+              );
+            }
+
+            return const LoginScreen();
+          }),
+        ),
+        debugShowCheckedModeBanner: false,
+      ),
     );
   }
 }
