@@ -58,7 +58,6 @@ class _SignupScreenState extends State<SignupScreen> {
     setState(() {
       _isLoading = true;
     });
-
     //TODO: Setting img = default profile
     if (_img == null) {
       final ByteData bytes =

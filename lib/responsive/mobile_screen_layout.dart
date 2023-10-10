@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:instagram_clone_1/utlis/colors.dart';
+import 'package:instagram_clone_1/utlis/gobal_varible.dart';
 
 class MobileScreenLayout extends StatefulWidget {
   const MobileScreenLayout({super.key});
@@ -43,13 +44,7 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
         physics: const NeverScrollableScrollPhysics(),
         controller: _pageController,
         onPageChanged: onPageChanged,
-        children: const [
-          Text('Search'),
-          Text('Home'),
-          Text('Post'),
-          Text('Farvourite'),
-          Text('Person'),
-        ],
+        children: homeItemScreens,
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: mobileBackgroundColor,
@@ -57,7 +52,7 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
         items: [
           BottomNavigationBarItem(
             icon: Icon(
-              Icons.search,
+              Icons.feed,
               color: _page == 0 ? primaryColor : secondaryColor,
             ),
             label: '',
