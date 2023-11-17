@@ -89,7 +89,17 @@ class _PostCardState extends State<PostCard> {
                                                 ),
                                                 child: Text(e),
                                               ),
-                                              onTap: () {},
+                                              onTap: () async {
+                                                if (e == 'Xóa') {
+                                                  //TODO: Hoàn tác việc xóa
+                                                  showSnackBar(
+                                                      '$e + ${widget.snap['postId']}',
+                                                      context);
+                                                  FirestoreMethods().deletePost(
+                                                      widget.snap['postId']);
+                                                }
+                                                Navigator.of(context).pop();
+                                              },
                                             ),
                                           )
                                           .toList(),

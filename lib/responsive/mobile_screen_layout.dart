@@ -2,6 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:instagram_clone_1/utlis/colors.dart';
 import 'package:instagram_clone_1/utlis/gobal_varible.dart';
 
+class PageControllerInherited extends InheritedWidget {
+  final PageController pageController;
+
+  const PageControllerInherited({
+    super.key,
+    required this.pageController,
+    required Widget child,
+  }) : super(child: child);
+
+  static PageControllerInherited? of(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<PageControllerInherited>();
+  }
+
+  @override
+  bool updateShouldNotify(PageControllerInherited oldWidget) {
+    return oldWidget.pageController != pageController;
+  }
+}
+
 class MobileScreenLayout extends StatefulWidget {
   const MobileScreenLayout({super.key});
 
@@ -39,58 +59,61 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: PageView(
-        physics: const NeverScrollableScrollPhysics(),
-        controller: _pageController,
-        onPageChanged: onPageChanged,
-        children: homeItemScreens,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: mobileBackgroundColor,
-        type: BottomNavigationBarType.fixed,
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.feed,
-              color: _page == 0 ? primaryColor : secondaryColor,
-            ),
-            label: '',
-            backgroundColor: primaryColor,
-          ),
-          BottomNavigationBarItem(
+    return PageControllerInherited(
+      pageController: _pageController,
+      child: Scaffold(
+        body: PageView(
+          physics: const NeverScrollableScrollPhysics(),
+          controller: _pageController,
+          onPageChanged: onPageChanged,
+          children: homeItemScreens,
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          backgroundColor: mobileBackgroundColor,
+          type: BottomNavigationBarType.fixed,
+          items: [
+            BottomNavigationBarItem(
               icon: Icon(
                 Icons.home,
-                color: _page == 1 ? primaryColor : secondaryColor,
+                color: _page == 0 ? primaryColor : secondaryColor,
               ),
               label: '',
-              backgroundColor: primaryColor),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.add_circle_rounded,
-              color: _page == 2 ? primaryColor : secondaryColor,
+              backgroundColor: primaryColor,
             ),
-            label: '',
-            backgroundColor: primaryColor,
-          ),
-          BottomNavigationBarItem(
-            label: '',
-            icon: Icon(
-              Icons.favorite,
-              color: _page == 3 ? primaryColor : secondaryColor,
+            BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.search,
+                  color: _page == 1 ? primaryColor : secondaryColor,
+                ),
+                label: '',
+                backgroundColor: primaryColor),
+            BottomNavigationBarItem(
+              icon: Icon(
+                Icons.add_circle_rounded,
+                color: _page == 2 ? primaryColor : secondaryColor,
+              ),
+              label: '',
+              backgroundColor: primaryColor,
             ),
-            backgroundColor: primaryColor,
-          ),
-          BottomNavigationBarItem(
-            label: '',
-            icon: Icon(
-              Icons.person,
-              color: _page == 4 ? primaryColor : secondaryColor,
+            BottomNavigationBarItem(
+              label: '',
+              icon: Icon(
+                Icons.favorite,
+                color: _page == 3 ? primaryColor : secondaryColor,
+              ),
+              backgroundColor: primaryColor,
             ),
-            backgroundColor: primaryColor,
-          ),
-        ],
-        onTap: navigationTapped,
+            BottomNavigationBarItem(
+              label: '',
+              icon: Icon(
+                Icons.person,
+                color: _page == 4 ? primaryColor : secondaryColor,
+              ),
+              backgroundColor: primaryColor,
+            ),
+          ],
+          onTap: navigationTapped,
+        ),
       ),
     );
   }

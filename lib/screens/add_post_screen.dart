@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:instagram_clone_1/models/user.dart';
 import 'package:instagram_clone_1/providers/user_provider.dart';
 import 'package:instagram_clone_1/resources/firestore_methods.dart';
+import 'package:instagram_clone_1/responsive/mobile_screen_layout.dart';
 import 'package:instagram_clone_1/utlis/colors.dart';
 import 'package:instagram_clone_1/utlis/utlis.dart';
 import 'package:provider/provider.dart';
@@ -20,6 +21,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
   Uint8List? _file;
   final TextEditingController _descriptionController = TextEditingController();
   bool _isLoading = false;
+  late PageController _pageController;
 
   void postImage(
     String uid,
@@ -44,6 +46,12 @@ class _AddPostScreenState extends State<AddPostScreen> {
     } catch (e) {
       showSnackBar(e.toString(), context);
     }
+  }
+
+  _backToFeed() {
+    final pageControllerInherited = PageControllerInherited.of(context);
+    _pageController = pageControllerInherited!.pageController;
+    _pageController.jumpToPage(0);
   }
 
   _selectImage(BuildContext context) async {
@@ -92,6 +100,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
     // TODO: implement dispose
     super.dispose();
     _descriptionController.dispose();
+
+    // _pageController.dispose();
   }
 
   @override
@@ -114,14 +124,17 @@ class _AddPostScreenState extends State<AddPostScreen> {
                 onPressed: () {},
                 icon: const Icon(Icons.arrow_back),
               ),
-              title: const Text('Đăng Bài'),
+              title: const Text('Tạo bài viết của bạn'),
               centerTitle: false,
               actions: [
                 TextButton(
-                    onPressed: () =>
-                        postImage(user.uid, user.username, user.photoUrl),
+                    onPressed: () {
+                      postImage(user.uid, user.username, user.photoUrl);
+                      Future.delayed(const Duration(seconds: 3));
+                      // _backToFeed();
+                    },
                     child: const Text(
-                      'Đăng',
+                      'Đăng bài',
                       style: TextStyle(
                           color: Colors.blueAccent,
                           fontWeight: FontWeight.bold,
