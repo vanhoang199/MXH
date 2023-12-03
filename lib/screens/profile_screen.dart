@@ -38,8 +38,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           .doc(widget.uid)
           .get();
       var postSnap = await FirebaseFirestore.instance
-          .collection('post')
-          .where('uid', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+          .collection('posts')
+          .where('uid', isEqualTo: widget.uid)
           .get();
 
       postLen = postSnap.docs.length;

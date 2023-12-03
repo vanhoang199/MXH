@@ -15,6 +15,7 @@ class ChatService extends ChangeNotifier {
     final String email = _firebaseAuth.currentUser!.email.toString();
     final Timestamp timestamp = Timestamp.now();
 
+    //Đặt trùng name emai
     // create a new message
     Message newMessage = Message(
       senderId: currentUserId,
@@ -48,5 +49,27 @@ class ChatService extends ChangeNotifier {
         .collection('messages')
         .orderBy('timestamp', descending: false)
         .snapshots();
+  }
+
+  Future<List> getListUidFollowing() async {
+    DocumentSnapshot snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .get();
+
+    Map<String, dynamic> data = snapshot.data()! as Map<String, dynamic>;
+    List uidFollowing = data['following'];
+    return uidFollowing;
+  }
+
+  Future<List> getListUidFollowers() async {
+    DocumentSnapshot snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .get();
+
+    Map<String, dynamic> data = snapshot.data()! as Map<String, dynamic>;
+    List uidFollowers = data['followers'];
+    return uidFollowers;
   }
 }

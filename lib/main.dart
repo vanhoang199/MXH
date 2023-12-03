@@ -6,6 +6,7 @@ import 'package:instagram_clone_1/providers/user_provider.dart';
 import 'package:instagram_clone_1/responsive/mobile_screen_layout.dart';
 import 'package:instagram_clone_1/responsive/responsive_layout_screen.dart';
 import 'package:instagram_clone_1/responsive/web_screen_layout.dart';
+import 'package:instagram_clone_1/screens/error_screen.dart';
 import 'package:instagram_clone_1/screens/login_screen.dart';
 
 import 'package:instagram_clone_1/utlis/colors.dart';
@@ -27,7 +28,8 @@ main() async {
   } else {
     await Firebase.initializeApp();
   }
-
+  // ErrorWidget.builder = (FlutterErrorDetails flutterErrorDetails) =>
+  //     errorScreen(flutterErrorDetails.exception);
   runApp(const MyApp());
 }
 
@@ -52,6 +54,8 @@ class MyApp extends StatelessWidget {
           // sign in + sign out
           stream: FirebaseAuth.instance.authStateChanges(),
           builder: ((context, snapshot) {
+            //TODO: Check data
+
             if (snapshot.connectionState == ConnectionState.active) {
               if (snapshot.hasData) {
                 return const ResponsiveLayoutScreen(

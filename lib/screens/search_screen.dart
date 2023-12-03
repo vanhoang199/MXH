@@ -43,35 +43,41 @@ class _SearchScreenState extends State<SearchScreen> {
                   .collection('users')
                   .where('username',
                       isGreaterThanOrEqualTo: searchController.text)
+                  .where('username',
+                      isLessThanOrEqualTo: '${searchController.text}\uf8ff')
                   .get(),
               builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                return ListView.builder(
-                  itemCount: (snapshot.data! as dynamic).docs.length,
-                  itemBuilder: (context, index) {
-                    return InkWell(
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => ProfileScreen(
-                              uid: (snapshot.data! as dynamic).docs[index]
-                                  ['uid']),
+                if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else if (snapshot.connectionState == ConnectionState.done) {
+                  return ListView.builder(
+                    itemCount: (snapshot.data! as dynamic).docs.length,
+                    itemBuilder: (context, index) {
+                      return InkWell(
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => ProfileScreen(
+                                uid: (snapshot.data! as dynamic).docs[index]
+                                    ['uid']),
+                          ),
                         ),
-                      ),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundImage: NetworkImage(
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            radius: 16,
+                            backgroundImage: NetworkImage(
                               (snapshot.data! as dynamic).docs[index]
-                                  ['photoUrl']),
+                                  ['photoUrl'],
+                            ),
+                          ),
+                          title: Text((snapshot.data! as dynamic).docs[index]
+                              ['username']),
                         ),
-                        title: Text((snapshot.data! as dynamic).docs[index]
-                            ['username']),
-                      ),
-                    );
-                  },
-                );
+                      );
+                    },
+                  );
+                } else {
+                  return const CircularProgressIndicator();
+                }
               },
             )
           : FutureBuilder(

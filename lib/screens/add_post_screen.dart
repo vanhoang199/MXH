@@ -37,6 +37,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
       if (res == 'Thành công') {
         setState(() {
           _isLoading = false;
+          _file = null;
         });
         showSnackBar('Posted', context);
       } else {
@@ -130,6 +131,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                     onPressed: () {
                       postImage(user.uid, user.username, user.photoUrl);
                       Future.delayed(const Duration(seconds: 3));
+
                       // _backToFeed();
                     },
                     child: const Text(

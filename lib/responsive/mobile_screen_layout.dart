@@ -1,4 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:instagram_clone_1/screens/profile_screen.dart';
 import 'package:instagram_clone_1/utlis/colors.dart';
 import 'package:instagram_clone_1/utlis/gobal_varible.dart';
 
@@ -48,6 +51,7 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
   }
 
   void navigationTapped(int page) {
+    ProfileScreen(uid: FirebaseAuth.instance.currentUser!.uid);
     _pageController.jumpToPage(page);
   }
 

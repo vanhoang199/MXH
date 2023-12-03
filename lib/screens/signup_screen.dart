@@ -98,6 +98,7 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: SafeArea(
         child: Container(
           width: double.infinity,
@@ -106,7 +107,7 @@ class _SignupScreenState extends State<SignupScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Flexible(
-                flex: 2,
+                flex: 1,
                 child: Container(),
               ),
               SvgPicture.asset(
@@ -140,7 +141,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 ],
               ),
               const SizedBox(
-                height: 64,
+                height: 32,
               ),
               TextFieldInput(
                 textEditingController: _userNameController,
@@ -149,7 +150,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 isPass: false,
               ),
               const SizedBox(
-                height: 24,
+                height: 12,
               ),
               TextFieldInput(
                 textEditingController: _emailController,
@@ -157,7 +158,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 textInputType: TextInputType.emailAddress,
               ),
               const SizedBox(
-                height: 24,
+                height: 12,
               ),
               TextFieldInput(
                 textEditingController: _passwordController,
@@ -166,7 +167,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 isPass: true,
               ),
               const SizedBox(
-                height: 24,
+                height: 12,
               ),
               TextFieldInput(
                 textEditingController: _bioController,
@@ -175,7 +176,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 isPass: false,
               ),
               const SizedBox(
-                height: 24,
+                height: 12,
               ),
               InkWell(
                 onTap: signUpUser,
@@ -205,7 +206,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 height: 12,
               ),
               Flexible(
-                flex: 2,
+                flex: 1,
                 child: Container(),
               ),
               Row(
@@ -228,6 +229,10 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                   )
                 ],
+              ),
+              Flexible(
+                flex: 1,
+                child: Container(),
               )
             ],
           ),
