@@ -1,13 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:instagram_clone_1/screens/add_post_screen.dart';
+import 'package:instagram_clone_1/screens/feed_screen.dart';
+import 'package:instagram_clone_1/screens/list_user_ver1.dart';
 import 'package:instagram_clone_1/screens/profile_screen.dart';
+import 'package:instagram_clone_1/screens/search_screen.dart';
 import 'package:instagram_clone_1/utlis/colors.dart';
 import 'package:instagram_clone_1/utlis/gobal_varible.dart';
 
 class PageControllerInherited extends InheritedWidget {
   final PageController pageController;
-
   const PageControllerInherited({
     super.key,
     required this.pageController,
@@ -51,7 +53,8 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
   }
 
   void navigationTapped(int page) {
-    ProfileScreen(uid: FirebaseAuth.instance.currentUser!.uid);
+    // ProfileScreen(uid: FirebaseAuth.instance.currentUser!.uid);
+    //Không hoạt động, profileScreen vẫn lỗi sau khi tìm kiếm
     _pageController.jumpToPage(page);
   }
 
@@ -63,6 +66,7 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
 
   @override
   Widget build(BuildContext context) {
+    String uid = FirebaseAuth.instance.currentUser!.uid;
     return PageControllerInherited(
       pageController: _pageController,
       child: Scaffold(
@@ -70,7 +74,15 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
           physics: const NeverScrollableScrollPhysics(),
           controller: _pageController,
           onPageChanged: onPageChanged,
-          children: homeItemScreens,
+          children: [
+            const FeedScreen(),
+            const SearchScreen(),
+            const AddPostScreen(),
+            const ListUserVer1(),
+            ProfileScreen(
+              uid: uid,
+            ),
+          ],
         ),
         bottomNavigationBar: BottomNavigationBar(
           backgroundColor: mobileBackgroundColor,

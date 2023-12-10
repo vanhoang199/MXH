@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:instagram_clone_1/screens/profile_screen.dart';
+import 'package:instagram_clone_1/screens/profile_screen_navigator_from_search.dart';
 import 'package:instagram_clone_1/utlis/colors.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -56,9 +56,10 @@ class _SearchScreenState extends State<SearchScreen> {
                       return InkWell(
                         onTap: () => Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (context) => ProfileScreen(
-                                uid: (snapshot.data! as dynamic).docs[index]
-                                    ['uid']),
+                            builder: (context) =>
+                                ProfileScreenNavigatorFromSearch(
+                                    uid: (snapshot.data! as dynamic).docs[index]
+                                        ['uid']),
                           ),
                         ),
                         child: ListTile(
@@ -80,6 +81,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 }
               },
             )
+          //TODO: Add inkwell navigator to post - check instagram hoạt động
           : FutureBuilder(
               future: FirebaseFirestore.instance.collection('posts').get(),
               builder: (context, snapshot) {

@@ -13,9 +13,14 @@ Widget errorScreen(dynamic detailsException) {
             foundation.kReleaseMode
                 //Widget for release mode
                 ? const Center(
-                    child: Text(
-                      'Xin lỗi vì sự bất tiện này',
-                      style: TextStyle(fontSize: 24.0),
+                    child: Column(
+                      children: [
+                        CircularProgressIndicator(),
+                        Text(
+                          'Đang tải vui lòng chờ chút',
+                          style: TextStyle(fontSize: 24.0),
+                        ),
+                      ],
                     ),
                   )
                 //Widget for debug mode

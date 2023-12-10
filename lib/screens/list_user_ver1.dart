@@ -1,8 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:instagram_clone_1/Services/chat_service.dart';
-import 'package:instagram_clone_1/screens/chat_page.dart';
+import 'package:instagram_clone_1/screens/chat_page_ver1.dart';
 import 'package:instagram_clone_1/utlis/colors.dart';
 
 class ListUserVer1 extends StatefulWidget {
@@ -186,8 +185,8 @@ class _ListUserVer1State extends State<ListUserVer1> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ChatPage(
-                  recevierUid: data['uid'], recevierUserEmail: data['email']),
+              builder: (context) => ChatPageVer1(
+                  recevierUid: data['uid'], recevierUserName: data['username']),
             ),
           );
         },

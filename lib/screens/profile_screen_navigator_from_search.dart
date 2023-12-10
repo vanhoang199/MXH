@@ -7,15 +7,17 @@ import 'package:instagram_clone_1/screens/login_screen.dart';
 import 'package:instagram_clone_1/utlis/colors.dart';
 import 'package:instagram_clone_1/widgets/follow_button.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreenNavigatorFromSearch extends StatefulWidget {
   final String uid;
-  const ProfileScreen({super.key, required this.uid});
+  const ProfileScreenNavigatorFromSearch({super.key, required this.uid});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  State<ProfileScreenNavigatorFromSearch> createState() =>
+      _ProfileScreenNavigatorFromSearchState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenNavigatorFromSearchState
+    extends State<ProfileScreenNavigatorFromSearch> {
   var userData = {};
   int postLen = 0;
   int followers = 0;
@@ -240,13 +242,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         Container(
           margin: const EdgeInsets.only(top: 2),
-          width: 40.0,
           child: Text(
             label,
             style: const TextStyle(
                 fontSize: 15, fontWeight: FontWeight.w400, color: Colors.grey),
-            overflow: TextOverflow.ellipsis,
-            softWrap: false,
           ),
         )
       ],

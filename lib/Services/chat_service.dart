@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:instagram_clone_1/models/message.dart';
 
@@ -71,5 +70,12 @@ class ChatService extends ChangeNotifier {
     Map<String, dynamic> data = snapshot.data()! as Map<String, dynamic>;
     List uidFollowers = data['followers'];
     return uidFollowers;
+  }
+
+  String getChatRoomIds(String userId, otherId) {
+    List<String> ids = [userId, otherId];
+    ids.sort();
+    String chatRoomId = ids.join("_");
+    return chatRoomId;
   }
 }
