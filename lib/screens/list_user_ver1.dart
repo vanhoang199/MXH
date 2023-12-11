@@ -1,8 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:instagram_clone_1/Services/chat_service.dart';
 import 'package:instagram_clone_1/screens/chat_page_ver1.dart';
 import 'package:instagram_clone_1/utlis/colors.dart';
+import 'package:instagram_clone_1/utlis/utlis.dart';
+import 'package:intl/intl.dart';
 
 class ListUserVer1 extends StatefulWidget {
   const ListUserVer1({super.key});
@@ -12,6 +15,7 @@ class ListUserVer1 extends StatefulWidget {
 }
 
 class _ListUserVer1State extends State<ListUserVer1> {
+  final ChatService _chatService = ChatService();
   List uidFollowing = [];
   List uidFollower = [];
   bool isLoading = true;
@@ -177,18 +181,138 @@ class _ListUserVer1State extends State<ListUserVer1> {
 
   Widget _buildUserListItem(DocumentSnapshot document, BuildContext context) {
     Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
+    String currentUserUid = FirebaseAuth.instance.currentUser!.uid;
+    String otherUid = data['uid'];
     // Hiện tất cả người đăng kí tài khoản trừ người dùng hiện tại
     if (data.containsKey('uid')) {
-      return ListTile(
-        title: Text(data['username']),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ChatPageVer1(
-                  recevierUid: data['uid'], recevierUserName: data['username']),
-            ),
-          );
+      return FutureBuilder(
+        future: _chatService.getLastMessages(currentUserUid, otherUid),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const CircularProgressIndicator(); // Hiển thị indicator khi dữ liệu đang được tải
+          } else if (snapshot.hasError) {
+            //1 trong các lỗi là Lỗi là không có tin nhắn giữa 2 người
+            return ListTile(
+              leading: CircleAvatar(
+                backgroundImage: NetworkImage(data['photoUrl']),
+              ),
+              title: Text(
+                data['username'],
+                style: const TextStyle(fontSize: 20),
+              ),
+              subtitle: const Text(
+                'Chưa có tin nhắn nào với người này',
+                textAlign: TextAlign.start,
+              ),
+              trailing: const Text(
+                '',
+                textAlign: TextAlign.justify,
+              ),
+              onLongPress: () {
+                showDialog(
+                    context: context,
+                    builder: (_) {
+                      return AlertDialog(
+                        title: const Text('Xóa lịch sử!'),
+                        content: const Text('Bạn chưa thể xóa được\n'
+                            'Vì bạn và người dùng này chưa có tin nhắn nào\n'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            style: TextButton.styleFrom(
+                              textStyle: Theme.of(context).textTheme.labelLarge,
+                            ),
+                            child: const Text('Đã hiểu'),
+                          )
+                        ],
+                      );
+                    });
+              }, //Xóa tin nhắn với người dùng này
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChatPageVer1(
+                        recevierUid: data['uid'],
+                        recevierUserName: data['username']),
+                  ),
+                );
+              },
+            ); // Hiể; // Hiển thị thông báo lỗi nếu có lỗi xảy ra
+          } else if (snapshot.hasData) {
+            String lastMessage = snapshot.data!['message'];
+            var time = snapshot.data!['timestamp'].toDate();
+            return ListTile(
+              leading: CircleAvatar(
+                backgroundImage: NetworkImage(data['photoUrl']),
+              ),
+              title: Text(
+                data['username'],
+                style: const TextStyle(fontSize: 20),
+              ),
+              subtitle: Text(
+                lastMessage,
+                textAlign: TextAlign.start,
+              ),
+              trailing: Text(
+                DateFormat.yMMMd().format(time),
+                textAlign: TextAlign.justify,
+              ),
+              onLongPress: () {
+                showDialog(
+                    context: context,
+                    builder: (_) {
+                      return AlertDialog(
+                        title: const Text('Xóa Trò Truyện!'),
+                        content: const Text(
+                            'Đồng ý: Xóa hết lịch sử trò chuyện với người này\n'
+                            'Không: Giữ nguyên ban đầu\n'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            style: TextButton.styleFrom(
+                              textStyle: Theme.of(context).textTheme.labelLarge,
+                            ),
+                            child: const Text('Không'),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              String result = await _chatService.deleteDocument(
+                                _chatService.getChatRoomIds(
+                                    currentUserUid, otherUid),
+                              );
+
+                              showSnackBar(result, context);
+                              Navigator.of(context).pop();
+                            },
+                            style: TextButton.styleFrom(
+                              textStyle: Theme.of(context).textTheme.labelLarge,
+                            ),
+                            child: const Text('Đồng ý'),
+                          )
+                        ],
+                      );
+                    });
+              }, //Xóa tin nhắn với người dùng này
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChatPageVer1(
+                        recevierUid: data['uid'],
+                        recevierUserName: data['username']),
+                  ),
+                );
+              },
+            ); // Hiển thị dữ liệu đã tải thành công
+          } else {
+            return const Text(
+                'Chưa có dữ liệu'); // Hiển thị khi chưa có dữ liệu
+          }
         },
       );
     } else {

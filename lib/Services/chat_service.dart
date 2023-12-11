@@ -50,6 +50,24 @@ class ChatService extends ChangeNotifier {
         .snapshots();
   }
 
+  Future<Map<String, dynamic>> getLastMessages(
+      String userId, String otherId) async {
+    List<String> ids = [userId, otherId];
+    ids.sort();
+    String chatRoomId = ids.join("_");
+
+    QuerySnapshot<Map<String, dynamic>> lastMessages = await FirebaseFirestore
+        .instance
+        .collection('chat_rooms')
+        .doc(chatRoomId)
+        .collection('messages')
+        .orderBy('timestamp', descending: true)
+        .limit(1)
+        .get();
+
+    return lastMessages.docs[0].data();
+  }
+
   Future<List> getListUidFollowing() async {
     DocumentSnapshot snapshot = await FirebaseFirestore.instance
         .collection('users')
@@ -77,5 +95,25 @@ class ChatService extends ChangeNotifier {
     ids.sort();
     String chatRoomId = ids.join("_");
     return chatRoomId;
+  }
+
+  Future<String> deleteDocument(String documentId) async {
+    String result = 'Thất bại';
+    try {
+      QuerySnapshot snap = await FirebaseFirestore.instance
+          .collection(
+              'chat_rooms') // Thay thế 'collection_name' bằng tên collection của bạn
+          .doc(documentId)
+          .collection('messages')
+          .get();
+
+      for (var documentSnapshot in snap.docs) {
+        await documentSnapshot.reference.delete();
+      }
+      result = 'Thành công';
+    } catch (e) {
+      print(e.toString());
+    }
+    return result;
   }
 }

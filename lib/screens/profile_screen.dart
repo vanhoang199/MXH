@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:instagram_clone_1/resources/auth_methods.dart';
 import 'package:instagram_clone_1/resources/firestore_methods.dart';
 import 'package:instagram_clone_1/screens/login_screen.dart';
+import 'package:instagram_clone_1/screens/post_screen.dart';
 import 'package:instagram_clone_1/utlis/colors.dart';
 import 'package:instagram_clone_1/widgets/follow_button.dart';
 
@@ -212,12 +213,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       itemBuilder: (context, index) {
                         DocumentSnapshot snap =
                             (snapshot.data! as dynamic).docs[index];
-                        return Container(
-                          child: Image(
-                            image: NetworkImage(
-                              snap['postUrl'],
+                        return InkWell(
+                          onTap: () {
+                            Navigator.of(context)
+                                .push(MaterialPageRoute(builder: (_) {
+                              return PostScreen(
+                                uid: (snapshot.data! as dynamic).docs[index]
+                                    ['uid'],
+                                postLongPressId: (snapshot.data! as dynamic)
+                                    .docs[index]['postId'],
+                                userPost: (snapshot.data! as dynamic)
+                                    .docs[index]['username'],
+                              );
+                            }));
+                          },
+                          child: Container(
+                            child: Image(
+                              image: NetworkImage(
+                                snap['postUrl'],
+                              ),
+                              fit: BoxFit.cover,
                             ),
-                            fit: BoxFit.cover,
                           ),
                         );
                       },

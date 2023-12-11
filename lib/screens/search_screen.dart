@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:instagram_clone_1/screens/post_screen.dart';
 import 'package:instagram_clone_1/screens/profile_screen_navigator_from_search.dart';
 import 'package:instagram_clone_1/utlis/colors.dart';
+import 'package:instagram_clone_1/widgets/post_card.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -85,14 +87,34 @@ class _SearchScreenState extends State<SearchScreen> {
           : FutureBuilder(
               future: FirebaseFirestore.instance.collection('posts').get(),
               builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator();
+                }
+                if (snapshot.hasError) {
+                  return Text('Xảy ra lỗi ${snapshot.error.toString()}');
+                }
                 if (!snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());
                 }
                 return StaggeredGridView.countBuilder(
                   crossAxisCount: 3,
                   itemCount: (snapshot.data! as dynamic).docs.length,
-                  itemBuilder: (contex, index) => Image.network(
-                      (snapshot.data! as dynamic).docs[index]['postUrl']),
+                  itemBuilder: (contex, index) => InkWell(
+                    onLongPress: () {
+                      Navigator.of(context)
+                          .push(MaterialPageRoute(builder: (_) {
+                        return PostScreen(
+                          uid: (snapshot.data! as dynamic).docs[index]['uid'],
+                          postLongPressId:
+                              (snapshot.data! as dynamic).docs[index]['postId'],
+                          userPost: (snapshot.data! as dynamic).docs[index]
+                              ['username'],
+                        );
+                      }));
+                    },
+                    child: Image.network(
+                        (snapshot.data! as dynamic).docs[index]['postUrl']),
+                  ),
                   staggeredTileBuilder: (index) => StaggeredTile.count(
                     (index % 7 == 0) ? 2 : 1,
                     (index % 7 == 0) ? 2 : 1,
