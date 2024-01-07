@@ -14,7 +14,6 @@ class ChatService extends ChangeNotifier {
     final String email = _firebaseAuth.currentUser!.email.toString();
     final Timestamp timestamp = Timestamp.now();
 
-    //Đặt trùng name emai
     // create a new message
     Message newMessage = Message(
       senderId: currentUserId,
@@ -88,6 +87,15 @@ class ChatService extends ChangeNotifier {
     Map<String, dynamic> data = snapshot.data()! as Map<String, dynamic>;
     List uidFollowers = data['followers'];
     return uidFollowers;
+  }
+
+  Future<List> getkownUsersUidList() async {
+    var listFollower = await getListUidFollowers();
+    var listFollowing = await getListUidFollowing();
+    var knowUsersUid = [];
+    knowUsersUid.addAll(listFollower);
+    knowUsersUid.addAll(listFollowing);
+    return knowUsersUid;
   }
 
   String getChatRoomIds(String userId, otherId) {

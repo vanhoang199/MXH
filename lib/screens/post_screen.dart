@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:instagram_clone_1/screens/profile_screen_navigator_from_search.dart';
-import 'package:instagram_clone_1/widgets/post_card.dart';
+import 'package:instagram_clone_1/widgets/post_card_multi_images.dart';
 
 class PostScreen extends StatefulWidget {
   final String uid;
@@ -27,20 +27,21 @@ class _PostScreenState extends State<PostScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Bài đăng của ${widget.userPost}'),
-        actions: [
-          IconButton(
-              onPressed: currentUid == widget.uid
-                  ? null
-                  : () {
+        title: Text(
+            'Bài đăng của ${currentUid == widget.uid ? 'tôi' : widget.userPost}'),
+        actions: currentUid == widget.uid
+            ? []
+            : [
+                IconButton(
+                    onPressed: () {
                       Navigator.of(context)
                           .push(MaterialPageRoute(builder: (_) {
                         return ProfileScreenNavigatorFromSearch(
                             uid: widget.uid);
                       }));
                     },
-              icon: const Icon(Icons.arrow_forward_sharp))
-        ],
+                    icon: const Icon(Icons.arrow_forward_sharp))
+              ],
       ),
       body: StreamBuilder(
         stream: FirebaseFirestore.instance
@@ -54,11 +55,16 @@ class _PostScreenState extends State<PostScreen> {
               child: CircularProgressIndicator(),
             );
           }
-
+          if (snapshot.data!.docs.isEmpty) {
+            SchedulerBinding.instance.addPostFrameCallback((_) {
+              Navigator.of(context).pop();
+            });
+          }
           return ListView.builder(
             itemCount: snapshot.data!.docs.length,
-            itemBuilder: (context, index) =>
-                PostCard(snap: snapshot.data!.docs[index].data()),
+            itemBuilder: (context, index) => PostCardFromMultiImages(
+                snap: snapshot.data!.docs[index].data(),
+                nameRouter: 'ProfileScreen'),
           );
         },
       ),

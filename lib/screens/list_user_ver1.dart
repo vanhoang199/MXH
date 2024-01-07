@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:instagram_clone_1/Services/chat_service.dart';
 import 'package:instagram_clone_1/screens/chat_page_ver1.dart';
 import 'package:instagram_clone_1/utlis/colors.dart';
-import 'package:instagram_clone_1/utlis/utlis.dart';
-import 'package:intl/intl.dart';
+import 'package:instagram_clone_1/widgets/action_icon.dart';
 
 class ListUserVer1 extends StatefulWidget {
   const ListUserVer1({super.key});
@@ -16,9 +15,7 @@ class ListUserVer1 extends StatefulWidget {
 
 class _ListUserVer1State extends State<ListUserVer1> {
   final ChatService _chatService = ChatService();
-  List uidFollowing = [];
-  List uidFollower = [];
-  bool isLoading = true;
+  final String _currentUserUid = FirebaseAuth.instance.currentUser!.uid;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,293 +29,196 @@ class _ListUserVer1State extends State<ListUserVer1> {
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-    setState(() {
-      isLoading = true;
-    });
-    try {
-      getFollowing();
-      getFollowers();
-    } catch (e) {
-      print(e);
-    }
-    setState(() {
-      isLoading = false;
-    });
-  }
-
-  getFollowing() async {
-    var result = await ChatService().getListUidFollowing();
-    setState(() {
-      uidFollowing = result;
-    });
-  }
-
-  getFollowers() async {
-    var result = await ChatService().getListUidFollowers();
-    setState(() {
-      uidFollower = result;
-    });
-  }
-
-  //Hàm kiểm tra,in ra uid của người theo dõi hoặc đang theo dõi
-  Widget _buidFollowersOrFollowingUser(BuildContext context) {
-    return isLoading
-        ? const Center(
-            child: CircularProgressIndicator(),
-          )
-        : FutureBuilder(
-            future: ChatService().getListUidFollowers(),
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return const Center(
-                  child: Text('Có lỗi!'),
-                );
-              }
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-
-              if (!snapshot.hasData) {
-                return const Center(
-                  child: Text('Dữ liệu lỗi'),
-                );
-              }
-
-              return ListView(
-                children: snapshot.data!
-                    .map<Widget>((doc) => _buildUserListItem(doc, context))
-                    .toList(),
-              );
-            },
-          );
-  }
-
-  isChatData(Map m) {
-    //Kiểm tra
-    //update: người lạ được chấp thuận
-    // var mapUidIsFollowingOrIsFollwer = {};
-
-    //1,following
-    // for (var i in uidFollowing) {
-    //   mapUidIsFollowingOrIsFollwer[i] = m.containsValue(i);
-    // }
-    for (var i in uidFollowing) {
-      if (m.containsValue(i)) {
-        return true;
-      }
-    }
-
-    //2,follwer
-    // for (var i in uidFollower) {
-    //   mapUidIsFollowingOrIsFollwer.putIfAbsent(i, () => m.containsValue(i));
-    // }
-    for (var i in uidFollower) {
-      if (m.containsValue(i)) {
-        return true;
-      }
-    }
-    // return mapUidIsFollowingOrIsFollwer.containsValue(true);
-    return false;
-  }
-
-  //Hiển thị
-  //Tên người theo dõi
-  //Tên người đang theo dõi
-  //Update: người lạ được cho phép
+  //snapshot trên người dùng hiện tại
+  //bạn bè = phần giao giữa 2 list người theo dõi và đang theo dõi
   Widget _buildUserList(BuildContext context) {
-    return isLoading
-        ? const Center(
+    return StreamBuilder(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const Center(
+            child: Text(
+              '_buildUserList: ' 'Xin lỗi vì sự bất tiện',
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+            ),
+          );
+        }
+
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
             child: CircularProgressIndicator(),
-          )
-        : StreamBuilder(
-            stream: FirebaseFirestore.instance
-                .collection('users')
-                .where('uid')
-                //.where('uid',whereNotIn: [FirebaseAuth.instance.currentUser!.uid])
-                .snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return const Center(
-                  child: Text(
-                    '_buildUserList: ' 'Xin lỗi vì sự bất tiện',
-                    style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-                  ),
-                );
-              }
+          );
+        }
 
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
+        if (!snapshot.hasData) {
+          return const Center(
+            child: Text('_buildUserList: ' 'Dữ Liệu Lỗi'),
+          );
+        }
 
-              if (!snapshot.hasData) {
-                return const Center(
-                  child: Text('_buildUserList: ' 'Dữ Liệu Lỗi'),
-                );
-              }
+        final curUsersDetail = snapshot.data!.data();
+        var followers = curUsersDetail!['followers'].toSet();
+        var following = curUsersDetail['following'].toSet();
+        var friends = following.intersection(followers).toList();
 
-              var chatData = snapshot.data!.docs;
+        return ListView(
+          children: friends
+              .map<Widget>((uid) => _buildUserListItem(uid, context))
+              .toList(),
+        );
+      },
+    );
+  }
 
-              chatData.removeWhere((element) => !isChatData(element.data()));
-              for (var e in chatData) {
-                (e.data()).toString();
-              }
+  Widget _buildUserListItem(String uid, BuildContext context) {
+    return FutureBuilder(
+        future: FirebaseFirestore.instance.collection('users').doc(uid).get(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Text('Xảy ra sự cố: ${snapshot.error}');
+          }
 
-              return ListView(
-                children: chatData
-                    .map<Widget>((doc) => _buildUserListItem(doc, context))
-                    .toList(),
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: Text('Vui lòng chờ, đang tải'),
+            );
+          }
+
+          if (!snapshot.hasData || snapshot.data!.exists == false) {
+            return const Text('Không tìm thấy dữ liệu');
+          }
+
+          var data = snapshot.data!.data();
+          return ListTile(
+            minLeadingWidth: 50,
+            leading: Stack(children: [
+              CircleAvatar(
+                backgroundImage: NetworkImage(data!['photoUrl']),
+              ),
+              Positioned(
+                  height: 30,
+                  width: 30,
+                  bottom: -5,
+                  right: -5,
+                  child: ActionIcons(context, data['uid'], 23))
+            ]),
+            title: Text(
+              data['username'],
+              style: const TextStyle(fontSize: 20),
+            ),
+            subtitle: _getLastMessages(uid, context),
+            trailing: const Text(
+              '',
+              textAlign: TextAlign.justify,
+            ),
+            onLongPress: () {
+              showDialog(
+                  context: context,
+                  builder: (_) {
+                    return AlertDialog(
+                      title: const Text('Xóa lịch sử!'),
+                      content: const Text(
+                          'Mọi tin nhắn giữa bạn và người dùng này sẽ mất hết\n'),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          style: TextButton.styleFrom(
+                            textStyle: Theme.of(context).textTheme.labelLarge,
+                          ),
+                          child: const Text('Từ chối'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            _chatService.deleteDocument(_chatService
+                                .getChatRoomIds(uid, _currentUserUid));
+                            Navigator.of(context).pop();
+                          },
+                          style: TextButton.styleFrom(
+                            textStyle: Theme.of(context).textTheme.labelLarge,
+                          ),
+                          child: const Text('Đồng ý'),
+                        )
+                      ],
+                    );
+                  });
+            }, //Xóa tin nhắn với người dùng này
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChatPageVer1(
+                      recevierUid: data['uid'],
+                      recevierUserName: data['username']),
+                ),
               );
             },
           );
+        });
   }
 
-  Widget _buildUserListItem(DocumentSnapshot document, BuildContext context) {
-    Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
-    String currentUserUid = FirebaseAuth.instance.currentUser!.uid;
-    String otherUid = data['uid'];
-    // Hiện tất cả người đăng kí tài khoản trừ người dùng hiện tại
-    if (data.containsKey('uid')) {
-      return FutureBuilder(
-        future: _chatService.getLastMessages(currentUserUid, otherUid),
+  Widget _getLastMessages(String uid, BuildContext context) {
+    return StreamBuilder(
+        stream: FirebaseFirestore.instance
+            .collection('chat_rooms')
+            .doc(_chatService.getChatRoomIds(uid, _currentUserUid))
+            .collection('messages')
+            .snapshots(),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator(); // Hiển thị indicator khi dữ liệu đang được tải
-          } else if (snapshot.hasError) {
-            //1 trong các lỗi là Lỗi là không có tin nhắn giữa 2 người
-            return ListTile(
-              leading: CircleAvatar(
-                backgroundImage: NetworkImage(data['photoUrl']),
-              ),
-              title: Text(
-                data['username'],
-                style: const TextStyle(fontSize: 20),
-              ),
-              subtitle: const Text(
-                'Chưa có tin nhắn nào với người này',
-                textAlign: TextAlign.start,
-              ),
-              trailing: const Text(
-                '',
-                textAlign: TextAlign.justify,
-              ),
-              onLongPress: () {
-                showDialog(
-                    context: context,
-                    builder: (_) {
-                      return AlertDialog(
-                        title: const Text('Xóa lịch sử!'),
-                        content: const Text('Bạn chưa thể xóa được\n'
-                            'Vì bạn và người dùng này chưa có tin nhắn nào\n'),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            style: TextButton.styleFrom(
-                              textStyle: Theme.of(context).textTheme.labelLarge,
-                            ),
-                            child: const Text('Đã hiểu'),
-                          )
-                        ],
-                      );
-                    });
-              }, //Xóa tin nhắn với người dùng này
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ChatPageVer1(
-                        recevierUid: data['uid'],
-                        recevierUserName: data['username']),
-                  ),
-                );
-              },
-            ); // Hiể; // Hiển thị thông báo lỗi nếu có lỗi xảy ra
-          } else if (snapshot.hasData) {
-            String lastMessage = snapshot.data!['message'];
-            var time = snapshot.data!['timestamp'].toDate();
-            return ListTile(
-              leading: CircleAvatar(
-                backgroundImage: NetworkImage(data['photoUrl']),
-              ),
-              title: Text(
-                data['username'],
-                style: const TextStyle(fontSize: 20),
-              ),
-              subtitle: Text(
-                lastMessage,
-                textAlign: TextAlign.start,
-              ),
-              trailing: Text(
-                DateFormat.yMMMd().format(time),
-                textAlign: TextAlign.justify,
-              ),
-              onLongPress: () {
-                showDialog(
-                    context: context,
-                    builder: (_) {
-                      return AlertDialog(
-                        title: const Text('Xóa Trò Truyện!'),
-                        content: const Text(
-                            'Đồng ý: Xóa hết lịch sử trò chuyện với người này\n'
-                            'Không: Giữ nguyên ban đầu\n'),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            style: TextButton.styleFrom(
-                              textStyle: Theme.of(context).textTheme.labelLarge,
-                            ),
-                            child: const Text('Không'),
-                          ),
-                          TextButton(
-                            onPressed: () async {
-                              String result = await _chatService.deleteDocument(
-                                _chatService.getChatRoomIds(
-                                    currentUserUid, otherUid),
-                              );
+          return FutureBuilder(
+              future: _chatService.getLastMessages(uid, _currentUserUid),
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  Text('_getLastMessages(): ${snapshot.error}');
+                }
 
-                              showSnackBar(result, context);
-                              Navigator.of(context).pop();
-                            },
-                            style: TextButton.styleFrom(
-                              textStyle: Theme.of(context).textTheme.labelLarge,
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: Text('Đang lấy tin nhắn gần nhất'),
+                  );
+                }
+
+                if (!snapshot.hasData) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8.0),
+                    child: Text('Chưa có tin nhắn nào!'),
+                  );
+                }
+
+                String daySended =
+                    snapshot.data!['timestamp'].toDate().day.toString();
+                String monthSended =
+                    snapshot.data!['timestamp'].toDate().month.toString();
+                return snapshot.data!['senderId'] == _currentUserUid
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Flexible(
+                            flex: 8,
+                            child: SizedBox(
+                              child: Text('Bạn: ${snapshot.data!['message']} ',
+                                  maxLines: 1, overflow: TextOverflow.ellipsis),
                             ),
-                            child: const Text('Đồng ý'),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              '$daySended-$monthSended',
+                              textAlign: TextAlign.right,
+                            ),
                           )
                         ],
+                      )
+                    : Text(
+                        snapshot.data!['message'],
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       );
-                    });
-              }, //Xóa tin nhắn với người dùng này
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ChatPageVer1(
-                        recevierUid: data['uid'],
-                        recevierUserName: data['username']),
-                  ),
-                );
-              },
-            ); // Hiển thị dữ liệu đã tải thành công
-          } else {
-            return const Text(
-                'Chưa có dữ liệu'); // Hiển thị khi chưa có dữ liệu
-          }
-        },
-      );
-    } else {
-      return const Center(
-        child: Text('Chưa có bạn bè nào để trò chuyện'),
-      );
-    }
+              });
+        });
   }
 }

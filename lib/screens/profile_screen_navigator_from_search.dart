@@ -1,11 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:instagram_clone_1/models/user.dart' as user_model;
+import 'package:instagram_clone_1/providers/user_provider.dart';
 import 'package:instagram_clone_1/resources/auth_methods.dart';
 import 'package:instagram_clone_1/resources/firestore_methods.dart';
 import 'package:instagram_clone_1/screens/login_screen.dart';
+import 'package:instagram_clone_1/screens/post_screen.dart';
 import 'package:instagram_clone_1/utlis/colors.dart';
 import 'package:instagram_clone_1/widgets/follow_button.dart';
+import 'package:provider/provider.dart';
 
 class ProfileScreenNavigatorFromSearch extends StatefulWidget {
   final String uid;
@@ -64,6 +68,7 @@ class _ProfileScreenNavigatorFromSearchState
 
   @override
   Widget build(BuildContext context) {
+    user_model.User user = Provider.of<UserProvider>(context).getUser;
     return isLoading
         ? const Center(
             child: CircularProgressIndicator(),
@@ -71,7 +76,7 @@ class _ProfileScreenNavigatorFromSearchState
         : Scaffold(
             appBar: AppBar(
               backgroundColor: mobileBackgroundColor,
-              title: Text(userData['username']),
+              title: Text(userData['email']),
               centerTitle: false,
             ),
             body: ListView(
@@ -95,6 +100,7 @@ class _ProfileScreenNavigatorFromSearchState
                                   mainAxisSize: MainAxisSize.max,
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceEvenly,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     buildStatColumn(postLen, 'Bài viết'),
                                     buildStatColumn(
@@ -159,6 +165,24 @@ class _ProfileScreenNavigatorFromSearchState
                                                                 .currentUser!
                                                                 .uid,
                                                             userData['uid']);
+                                                    await FirestoreMethods()
+                                                        .updateItemNotiCollection(
+                                                      FirebaseAuth.instance
+                                                          .currentUser!.uid,
+                                                      userData['uid'],
+                                                    );
+                                                    await FirestoreMethods()
+                                                        .cItemMessCollect(
+                                                            FirebaseAuth
+                                                                .instance
+                                                                .currentUser!
+                                                                .uid,
+                                                            user.username,
+                                                            'Theo Dõi',
+                                                            null,
+                                                            userData['uid'],
+                                                            userData[
+                                                                'username']);
                                                     setState(() {
                                                       isFollowing = true;
                                                       followers++;
@@ -214,12 +238,27 @@ class _ProfileScreenNavigatorFromSearchState
                       itemBuilder: (context, index) {
                         DocumentSnapshot snap =
                             (snapshot.data! as dynamic).docs[index];
-                        return Container(
-                          child: Image(
-                            image: NetworkImage(
-                              snap['postUrl'],
+                        return InkWell(
+                          onTap: () {
+                            Navigator.of(context)
+                                .push(MaterialPageRoute(builder: (_) {
+                              return PostScreen(
+                                uid: (snapshot.data! as dynamic).docs[index]
+                                    ['uid'],
+                                postLongPressId: (snapshot.data! as dynamic)
+                                    .docs[index]['postId'],
+                                userPost: (snapshot.data! as dynamic)
+                                    .docs[index]['username'],
+                              );
+                            }));
+                          },
+                          child: Container(
+                            child: Image(
+                              image: NetworkImage(
+                                snap['postUrl'],
+                              ),
+                              fit: BoxFit.cover,
                             ),
-                            fit: BoxFit.cover,
                           ),
                         );
                       },
@@ -240,14 +279,10 @@ class _ProfileScreenNavigatorFromSearchState
           number.toString(),
           style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         ),
-        Container(
-          margin: const EdgeInsets.only(top: 2),
-          child: Text(
-            label,
-            style: const TextStyle(
-                fontSize: 15, fontWeight: FontWeight.w400, color: Colors.grey),
-          ),
-        )
+        Column(
+            children: label.split(' ').map((e) {
+          return Text(e);
+        }).toList())
       ],
     );
   }

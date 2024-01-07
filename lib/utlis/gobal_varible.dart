@@ -15,3 +15,10 @@ List<Widget> homeItemScreens = [
   const ListUserVer1(),
   ProfileScreen(uid: FirebaseAuth.instance.currentUser!.uid),
 ];
+
+String replyCommentId = '';
+bool isComment = true;
+String userNameComment = '';
+
+//ToDo: Tên của các lớp
+const String FIRESTORE_METHOD = 'FirestoreMethod class: ';

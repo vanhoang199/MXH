@@ -6,7 +6,6 @@ import 'package:instagram_clone_1/screens/list_user_ver1.dart';
 import 'package:instagram_clone_1/screens/profile_screen.dart';
 import 'package:instagram_clone_1/screens/search_screen.dart';
 import 'package:instagram_clone_1/utlis/colors.dart';
-import 'package:instagram_clone_1/utlis/gobal_varible.dart';
 
 class PageControllerInherited extends InheritedWidget {
   final PageController pageController;
@@ -67,6 +66,7 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
   @override
   Widget build(BuildContext context) {
     String uid = FirebaseAuth.instance.currentUser!.uid;
+    Color tappedColor = Colors.blueAccent;
     return PageControllerInherited(
       pageController: _pageController,
       child: Scaffold(
@@ -91,7 +91,7 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
             BottomNavigationBarItem(
               icon: Icon(
                 Icons.home,
-                color: _page == 0 ? primaryColor : secondaryColor,
+                color: _page == 0 ? tappedColor : secondaryColor,
               ),
               label: '',
               backgroundColor: primaryColor,
@@ -99,14 +99,14 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
             BottomNavigationBarItem(
                 icon: Icon(
                   Icons.search,
-                  color: _page == 1 ? primaryColor : secondaryColor,
+                  color: _page == 1 ? tappedColor : secondaryColor,
                 ),
                 label: '',
                 backgroundColor: primaryColor),
             BottomNavigationBarItem(
               icon: Icon(
                 Icons.add_circle_rounded,
-                color: _page == 2 ? primaryColor : secondaryColor,
+                color: _page == 2 ? tappedColor : secondaryColor,
               ),
               label: '',
               backgroundColor: primaryColor,
@@ -114,8 +114,8 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
             BottomNavigationBarItem(
               label: '',
               icon: Icon(
-                Icons.favorite,
-                color: _page == 3 ? primaryColor : secondaryColor,
+                Icons.message_outlined,
+                color: _page == 3 ? tappedColor : secondaryColor,
               ),
               backgroundColor: primaryColor,
             ),
@@ -123,7 +123,7 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
               label: '',
               icon: Icon(
                 Icons.person,
-                color: _page == 4 ? primaryColor : secondaryColor,
+                color: _page == 4 ? tappedColor : secondaryColor,
               ),
               backgroundColor: primaryColor,
             ),

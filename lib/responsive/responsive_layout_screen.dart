@@ -22,12 +22,18 @@ class _ResponsiveLayoutScreenState extends State<ResponsiveLayoutScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    addData();
   }
 
   void addData() async {
     UserProvider userProvider = Provider.of(context, listen: false);
     await userProvider.refreshUser();
+  }
+
+  @override
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+    addData();
   }
 
   @override

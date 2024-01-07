@@ -17,6 +17,12 @@ class AuthMethods {
     return model.User.fromSnap(snapshot);
   }
 
+  Future<model.User> getUserByUid(String uid) async {
+    DocumentSnapshot snapshot =
+        await _firestore.collection('users').doc(uid).get();
+    return model.User.fromSnap(snapshot);
+  }
+
   Future<String> signUpUser({
     required String username,
     required String email,

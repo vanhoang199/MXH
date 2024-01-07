@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:instagram_clone_1/resources/auth_methods.dart';
+import 'package:instagram_clone_1/resources/firestore_methods.dart';
 import 'package:instagram_clone_1/responsive/responsive_layout_screen.dart';
 import 'package:instagram_clone_1/responsive/web_screen_layout.dart';
 import 'package:instagram_clone_1/screens/signup_screen.dart';
@@ -31,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // Tách code kiểu gì, để tránh  bất đồng bộ :?
-  void loginUser() async {
+  void loginUser(BuildContext context) async {
     setState(() {
       _isLoading = true;
     });
@@ -43,6 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (res == Code().signUpSuccess) {
       // ignore: use_build_context_synchronously
+      FirestoreMethods().updateStatusUser('onl');
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => const ResponsiveLayoutScreen(
@@ -110,7 +112,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 height: 24,
               ),
               InkWell(
-                onTap: loginUser,
+                onTap: () {
+                  loginUser(context);
+                },
                 child: _isLoading
                     ? const Center(
                         child: CircularProgressIndicator(

@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:instagram_clone_1/models/user.dart';
+import 'package:instagram_clone_1/providers/reply_comment_provider.dart';
 import 'package:instagram_clone_1/providers/user_provider.dart';
 import 'package:instagram_clone_1/resources/firestore_methods.dart';
 import 'package:instagram_clone_1/utlis/colors.dart';
+import 'package:instagram_clone_1/utlis/gobal_varible.dart';
 import 'package:instagram_clone_1/widgets/comment_card.dart';
 import 'package:provider/provider.dart';
 
@@ -28,6 +30,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
   @override
   Widget build(BuildContext context) {
     final User user = Provider.of<UserProvider>(context).getUser;
+    commentController.text = userNameComment;
     return Scaffold(
       appBar: AppBar(
         // leading: const Icon(Icons.arrow_back),
@@ -43,6 +46,11 @@ class _CommentsScreenState extends State<CommentsScreen> {
             .orderBy('datePublished', descending: true)
             .snapshots(),
         builder: (context, snapshot) {
+          var pathCollection = FirebaseFirestore.instance
+              .collection('posts')
+              .doc(widget.snap['postId'])
+              .collection('comments');
+
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(),
@@ -52,6 +60,8 @@ class _CommentsScreenState extends State<CommentsScreen> {
             itemCount: (snapshot.data! as dynamic).docs.length,
             itemBuilder: (context, index) => CommentCard(
               snap: (snapshot.data! as dynamic).docs[index].data(),
+              pathCollection: pathCollection,
+              dep: 0,
             ),
           );
         },
@@ -64,38 +74,74 @@ class _CommentsScreenState extends State<CommentsScreen> {
           padding: const EdgeInsets.only(left: 16, right: 8),
           child: Row(
             children: [
-              const CircleAvatar(
+              CircleAvatar(
                 // radius: 16,
-                backgroundImage: NetworkImage(
-                    'https://upload.wikimedia.org/wikipedia/vi/b/b0/Avatar-Teaser-Poster.jpg'),
+                backgroundImage: NetworkImage(user.photoUrl),
               ),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.only(left: 16.0, right: 8.0),
-                  child: TextField(
-                    controller: commentController,
-                    decoration: const InputDecoration(
-                        hintText: 'Nhập bình luận', border: InputBorder.none),
+                  child: Consumer<ReplyCommentProvider>(
+                    builder: ((context, data, _) {
+                      commentController.text = data.getUserName();
+                      return TextField(
+                        controller: commentController,
+                        decoration: const InputDecoration(
+                            hintText: 'Nhập bình luận',
+                            border: InputBorder.none),
+                      );
+                    }),
                   ),
                 ),
               ),
-              InkWell(
-                onTap: () async {
-                  FirestoreMethods().postComment(
-                      widget.snap['postId'],
-                      commentController.text,
-                      user.uid,
-                      user.username,
-                      user.photoUrl);
-                  setState(() {
+              Consumer<ReplyCommentProvider>(builder: (context, data, _) {
+                return InkWell(
+                  onTap: () async {
+                    if (isComment) {
+                      FirestoreMethods().postComment(
+                          widget.snap['postId'],
+                          commentController.text,
+                          user.uid,
+                          user.username,
+                          user.photoUrl);
+                    } else {
+                      if (commentController.text.contains('@')) {
+                        List<String> splitted =
+                            commentController.text.split(' ');
+
+                        String charactersAfterFirstSpace =
+                            commentController.text.substring(
+                                splitted[0].length + 1,
+                                commentController.text.length);
+
+                        FirestoreMethods().postReplyComment(
+                            widget.snap['postId'],
+                            data.getCommentId(),
+                            charactersAfterFirstSpace,
+                            user.uid,
+                            user.username,
+                            user.photoUrl);
+                      } else {
+                        FirestoreMethods().postComment(
+                            widget.snap['postId'],
+                            commentController.text,
+                            user.uid,
+                            user.username,
+                            user.photoUrl);
+                      }
+                    }
+
+                    data.setField('', '');
+                    isComment = true;
+
                     commentController.text = '';
-                  });
-                },
-                child: const Text(
-                  'Đăng',
-                  style: TextStyle(color: Colors.blueAccent),
-                ),
-              )
+                  },
+                  child: const Text(
+                    'Đăng',
+                    style: TextStyle(color: Colors.blueAccent),
+                  ),
+                );
+              })
             ],
           ),
         ),

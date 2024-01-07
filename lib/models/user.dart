@@ -61,15 +61,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class User {
-  final String email;
-  final String uid;
-  final String photoUrl;
-  final String username;
-  final String bio;
-  final List followers;
-  final List following;
+  String email;
+  String uid;
+  String photoUrl;
+  String username;
+  String bio;
+  List followers;
+  List following;
 
-  const User(
+  User(
       {required this.username,
       required this.uid,
       required this.photoUrl,
@@ -90,6 +90,17 @@ class User {
       followers: snapshot["followers"],
       following: snapshot["following"],
     );
+  }
+
+  static User createsEmptyUser() {
+    return User(
+        username: 'username',
+        uid: 'uid',
+        photoUrl: 'photoUrl',
+        email: 'email',
+        bio: 'bio',
+        followers: [],
+        following: []);
   }
 
   Map<String, dynamic> toJson() => {

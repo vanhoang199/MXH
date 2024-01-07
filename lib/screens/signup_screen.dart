@@ -1,9 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:instagram_clone_1/resources/auth_methods.dart';
+import 'package:instagram_clone_1/resources/firestore_methods.dart';
 import 'package:instagram_clone_1/screens/login_screen.dart';
 import 'package:instagram_clone_1/utlis/colors.dart';
 import 'package:instagram_clone_1/utlis/logincode.dart';
@@ -82,6 +85,9 @@ class _SignupScreenState extends State<SignupScreen> {
         ),
       );
     }
+
+    await FirestoreMethods()
+        .createItemNotiCollection(FirebaseAuth.instance.currentUser!.uid);
     setState(() {
       _isLoading = false;
     });
