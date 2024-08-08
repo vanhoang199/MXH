@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:instagram_clone_1/providers/noti_provider.dart';
 import 'package:instagram_clone_1/providers/reply_comment_provider.dart';
 import 'package:instagram_clone_1/providers/user_provider.dart';
 import 'package:instagram_clone_1/resources/firestore_methods.dart';
@@ -79,7 +80,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         ChangeNotifierProvider(
           create: (context) => UserProvider(),
         ),
-        ChangeNotifierProvider(create: (context) => ReplyCommentProvider())
+        ChangeNotifierProvider(create: (context) => ReplyCommentProvider()),
+        ChangeNotifierProvider(create: (context) => NotiProvider())
       ],
       child: MaterialApp(
         title: 'Flutter Demo',

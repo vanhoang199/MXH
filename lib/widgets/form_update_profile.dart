@@ -57,16 +57,19 @@ class FormUpdateProfileState extends State<FormUpdateProfile> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Họ Tên:',
-                style: TextStyle(color: Colors.white, fontSize: 28),
-              ),
               TextFormField(
+                decoration: const InputDecoration(
+                    label: Text(
+                      'Tên người dùng',
+                      style: TextStyle(
+                          color: Colors.blueAccent,
+                          fontStyle: FontStyle.italic),
+                    ),
+                    icon: Icon(Icons.person)),
                 controller: _username,
                 // initialValue:
                 //     Provider.of<UserProvider>(context).getUser.username,
-                style:
-                    const TextStyle(fontSize: 22, fontStyle: FontStyle.italic),
+                style: const TextStyle(fontSize: 22),
 
                 // The validator receives the text that the user has entered.
                 validator: (value) {
@@ -76,14 +79,19 @@ class FormUpdateProfileState extends State<FormUpdateProfile> {
                   return null;
                 },
               ),
-              const Text(
-                'Email:',
-                style: TextStyle(color: Colors.white, fontSize: 28),
-              ),
               TextFormField(
+                decoration: const InputDecoration(
+                    label: Text(
+                      'Email',
+                      style: TextStyle(
+                          color: Colors.blueAccent,
+                          fontStyle: FontStyle.italic),
+                    ),
+                    icon: Icon(Icons.email)),
                 controller: _email,
-                style:
-                    const TextStyle(fontSize: 22, fontStyle: FontStyle.italic),
+                style: const TextStyle(
+                  fontSize: 22,
+                ),
                 //initialValue: Provider.of<UserProvider>(context).getUser.email,
                 // The validator receives the text that the user has entered.
                 validator: (value) {
@@ -96,14 +104,17 @@ class FormUpdateProfileState extends State<FormUpdateProfile> {
                   return null;
                 },
               ),
-              const Text(
-                'Nghề nghiệp:',
-                style: TextStyle(color: Colors.white, fontSize: 28),
-              ),
               TextFormField(
+                decoration: const InputDecoration(
+                    label: Text(
+                      'Nghề nghiệp',
+                      style: TextStyle(
+                          color: Colors.blueAccent,
+                          fontStyle: FontStyle.italic),
+                    ),
+                    icon: Icon(Icons.badge)),
                 controller: _bio,
-                style:
-                    const TextStyle(fontSize: 22, fontStyle: FontStyle.italic),
+                style: const TextStyle(fontSize: 22),
                 //initialValue: Provider.of<UserProvider>(context).getUser.bio,
                 // The validator receives the text that the user has entered.
                 validator: (value) {
@@ -132,7 +143,7 @@ class FormUpdateProfileState extends State<FormUpdateProfile> {
                       );
                     }
                   },
-                  child: const Text('Submit'),
+                  child: const Center(child: Text('Cập nhật ')),
                 ),
               ),
             ],

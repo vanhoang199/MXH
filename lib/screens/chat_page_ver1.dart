@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:instagram_clone_1/Services/chat_service.dart';
 import 'package:instagram_clone_1/resources/auth_methods.dart';
 import 'package:instagram_clone_1/screens/video_call_page.dart';
+import 'package:instagram_clone_1/screens/voice_call_screen.dart';
 import 'package:instagram_clone_1/utlis/text_field_input.dart';
 import 'package:instagram_clone_1/models/user.dart' as user_model;
 import 'package:instagram_clone_1/widgets/action_icon.dart';
@@ -93,11 +94,84 @@ class _ChatPageVer1State extends State<ChatPageVer1> {
                   const SizedBox(
                     width: 5,
                   ),
-                  Text(widget.recevierUserName),
+                  Text(
+                    widget.recevierUserName,
+                    style: const TextStyle(fontSize: 12),
+                  ),
                 ],
               ),
               actions: [
                 ActionIcons(context, widget.recevierUid, null),
+                StreamBuilder(
+                  stream: FirebaseFirestore.instance
+                      .collection('vc')
+                      .doc(ChatService().getChatRoomIds(
+                          widget.recevierUid, _firebaseAuth.currentUser!.uid))
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.active) {
+                      if (snapshot.hasData) {
+                        var data = snapshot.data?.data()?['VoiceCall'] ?? false;
+                        if (data == true) {
+                          return IconButton(
+                              onPressed: () {
+                                FirebaseFirestore.instance
+                                    .collection('vc')
+                                    .doc(chatRoomIds)
+                                    .set({'VoiceCall': true});
+                                Navigator.push(
+                                    context,
+                                    CupertinoPageRoute(
+                                        builder: (_) => VoiceCallScreen(
+                                            callId: chatRoomIds,
+                                            userId: FirebaseAuth
+                                                .instance.currentUser!.uid,
+                                            userName: FirebaseAuth.instance
+                                                    .currentUser!.email ??
+                                                'NoName')));
+                              },
+                              icon: const Icon(Icons.phone,
+                                  color: Colors.green, size: 30));
+                        } else {
+                          return IconButton(
+                              onPressed: () {
+                                FirebaseFirestore.instance
+                                    .collection('vc')
+                                    .doc(chatRoomIds)
+                                    .set({'VoiceCall': true});
+                                Navigator.push(
+                                  context,
+                                  CupertinoPageRoute(
+                                    builder: (_) => VoiceCallScreen(
+                                        callId: chatRoomIds,
+                                        userId: FirebaseAuth
+                                            .instance.currentUser!.uid,
+                                        userName: FirebaseAuth
+                                                .instance.currentUser!.email ??
+                                            'NoName'),
+                                  ),
+                                );
+                              },
+                              icon: const Icon(Icons.phone,
+                                  color: Colors.white, size: 20));
+                        }
+                      } else if (snapshot.hasError) {
+                        return const Center(
+                          child: Text(
+                              "An error occured! Please check your internet connection."),
+                        );
+                      } else {
+                        return const Center(
+                          child: Text("Say hi to your new friend"),
+                        );
+                      }
+                    } else {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                  },
+                ),
                 StreamBuilder(
                   stream: FirebaseFirestore.instance
                       .collection('vc')
@@ -127,7 +201,7 @@ class _ChatPageVer1State extends State<ChatPageVer1> {
                                                 'NoName')));
                               },
                               icon: const Icon(Icons.video_call,
-                                  color: Colors.green, size: 50));
+                                  color: Colors.green, size: 30));
                         } else {
                           return IconButton(
                               onPressed: () {
@@ -149,7 +223,7 @@ class _ChatPageVer1State extends State<ChatPageVer1> {
                                 );
                               },
                               icon: const Icon(Icons.video_call,
-                                  color: Colors.white, size: 30));
+                                  color: Colors.white, size: 20));
                         }
                       } else if (snapshot.hasError) {
                         return const Center(
@@ -302,12 +376,19 @@ class _ChatPageVer1State extends State<ChatPageVer1> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
+        IconButton(
+          onPressed: () {},
+          icon: const Icon(
+            Icons.image,
+            size: 30,
+          ),
+        ),
         Expanded(
           flex: 1,
           child: TextFieldInput(
             textInputType: TextInputType.text,
             textEditingController: _messageController,
-            hintText: 'Enter Message',
+            hintText: 'Soạn tin nhắn',
             isPass: false,
           ),
         ),
@@ -315,11 +396,14 @@ class _ChatPageVer1State extends State<ChatPageVer1> {
         //     child: MyTextField(
         //         controller: _messageController,
         //         hintText: 'Nhập gì đó',
-        //         obscureText: false)),
+        //
+        //
+        //     obscureText: false)),
+
         IconButton(
           onPressed: sendMesage,
           icon: const Icon(
-            Icons.arrow_upward,
+            Icons.send,
             size: 40,
           ),
         ),

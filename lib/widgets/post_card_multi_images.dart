@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:instagram_clone_1/Services/chat_service.dart';
 import 'package:instagram_clone_1/models/user.dart' as user_model;
 import 'package:instagram_clone_1/providers/user_provider.dart';
 import 'package:instagram_clone_1/resources/firestore_methods.dart';
@@ -10,6 +11,8 @@ import 'package:instagram_clone_1/screens/comments_screen.dart';
 import 'package:instagram_clone_1/screens/profile_screen_navigator_from_search.dart';
 import 'package:instagram_clone_1/utlis/colors.dart';
 import 'package:instagram_clone_1/utlis/utlis.dart';
+import 'package:instagram_clone_1/widgets/follow_button.dart';
+import 'package:instagram_clone_1/widgets/full_size_image.dart';
 import 'package:instagram_clone_1/widgets/like_animation.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -37,6 +40,7 @@ class PostCardFromMultiImages extends StatefulWidget {
 class _PostCardFromMultiImagesState extends State<PostCardFromMultiImages> {
   bool isLikeAnimating = false;
   final ScreenshotController _screenshotController = ScreenshotController();
+  final bool _isFollowing = false;
 
   void _takeScreenshot(String username, String tittlePost) async {
     final uint8List = await _screenshotController.capture();
@@ -48,7 +52,11 @@ class _PostCardFromMultiImagesState extends State<PostCardFromMultiImages> {
   }
 
   _buildMoreVertItem() {
-    List<String> itemsName = <String>['Xóa', 'Chỉnh Sửa', 'Hoàn Tác'];
+    List<String> itemsName = <String>[
+      'Xóa',
+      'Lí do nhìn thấy bài viết này',
+      'Hoàn Tác'
+    ];
 
     if (widget.nameRouter == 'FeedScreen') {
       if (widget.snap['uid'] != FirebaseAuth.instance.currentUser!.uid) {
@@ -104,9 +112,6 @@ class _PostCardFromMultiImagesState extends State<PostCardFromMultiImages> {
       if (e == 'Xóa') {
         await FirestoreMethods().deleteSavedPost(widget.snap['postId']);
         // ignore: use_build_context_synchronously
-        showSnackBar(
-            '$e Bài viết ${widget.snap['postId'].substring(1, 5)} đã lưu',
-            context);
       }
       //Bug when delete
     } else if (nameRouter == 'ProfileScreen') {
@@ -127,14 +132,14 @@ class _PostCardFromMultiImagesState extends State<PostCardFromMultiImages> {
       controller: _screenshotController,
       child: Container(
         color: mobileBackgroundColor,
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        padding: const EdgeInsets.symmetric(vertical: 8),
         child: Column(
           children: [
             //header post
             Container(
               padding: const EdgeInsets.symmetric(
-                vertical: 4,
-              ).copyWith(right: 0),
+                vertical: 8,
+              ).copyWith(right: 0, left: 8),
               child: Column(
                 children: [
                   Row(
@@ -142,6 +147,9 @@ class _PostCardFromMultiImagesState extends State<PostCardFromMultiImages> {
                       CircleAvatar(
                         radius: 16,
                         backgroundImage: NetworkImage(widget.snap['profImage']),
+                      ),
+                      const SizedBox(
+                        width: 4,
                       ),
                       Expanded(
                         child: Column(
@@ -193,31 +201,41 @@ class _PostCardFromMultiImagesState extends State<PostCardFromMultiImages> {
                             itemCount: length,
                             scrollDirection: Axis.horizontal,
                             itemBuilder: (_, index) {
-                              return Padding(
-                                padding: const EdgeInsets.only(left: 15),
-                                child: Stack(children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                        image: DecorationImage(
-                                            image: NetworkImage(
-                                                listPostImageUrl[index]),
-                                            fit: BoxFit.cover)),
-                                    width: MediaQuery.of(context).size.width,
-                                  ),
-                                  length == 1
-                                      ? Container()
-                                      : Positioned(
-                                          top: 10,
-                                          right: 30,
-                                          child: Text(
-                                            'Ảnh ${index + 1}/$length',
-                                            style: const TextStyle(
-                                                fontStyle: FontStyle.italic,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 22),
-                                          ),
-                                        )
-                                ]),
+                              return InkWell(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) => FullSizeImage(
+                                          photoUrl: listPostImageUrl[index]),
+                                    ),
+                                  );
+                                },
+                                child: Stack(
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                          image: DecorationImage(
+                                              image: NetworkImage(
+                                                  listPostImageUrl[index]),
+                                              fit: BoxFit.cover)),
+                                      width: MediaQuery.of(context).size.width,
+                                    ),
+                                    length == 1
+                                        ? Container()
+                                        : Positioned(
+                                            top: 10,
+                                            right: 30,
+                                            child: Text(
+                                              'Ảnh ${index + 1}/$length',
+                                              style: const TextStyle(
+                                                  fontStyle: FontStyle.italic,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.blueAccent,
+                                                  fontSize: 20),
+                                            ),
+                                          )
+                                  ],
+                                ),
                               );
                             }),
                       ),
@@ -228,9 +246,10 @@ class _PostCardFromMultiImagesState extends State<PostCardFromMultiImages> {
                           isAnimating: isLikeAnimating,
                           duration: const Duration(milliseconds: 400),
                           onEnd: () {
-                            setState(() {
-                              isLikeAnimating = false;
-                            });
+                            // setState(() {
+                            //   isLikeAnimating = false;
+                            // });
+                            isLikeAnimating = false;
                           },
                           child: const Icon(
                             Icons.favorite,
@@ -244,7 +263,7 @@ class _PostCardFromMultiImagesState extends State<PostCardFromMultiImages> {
 
                   //Like, share, cmt, bookmark
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Row(
                       children: [
                         LikeAnimation(
@@ -333,7 +352,7 @@ class _PostCardFromMultiImagesState extends State<PostCardFromMultiImages> {
                         ),
                         Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.only(top: 8.0),
+                          padding: const EdgeInsets.only(top: 4.0),
                           child: RichText(
                             text: TextSpan(
                               style: const TextStyle(color: primaryColor),

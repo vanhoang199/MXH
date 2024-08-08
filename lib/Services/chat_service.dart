@@ -64,7 +64,11 @@ class ChatService extends ChangeNotifier {
         .limit(1)
         .get();
 
-    return lastMessages.docs[0].data();
+    if (lastMessages.docs.isNotEmpty) {
+      return lastMessages.docs[0].data();
+    }
+
+    return {'message': 'Chưa có tin nhắn nào!', 'timestamp': Timestamp.now()};
   }
 
   Future<List> getListUidFollowing() async {
@@ -86,7 +90,12 @@ class ChatService extends ChangeNotifier {
 
     Map<String, dynamic> data = snapshot.data()! as Map<String, dynamic>;
     List uidFollowers = data['followers'];
-    return uidFollowers;
+    return uidFollowers.map((e) => e.toString()).toList();
+  }
+
+  Future<bool> isFollowing(String uid) async {
+    List listFollowing = await getListUidFollowing();
+    return listFollowing.contains(uid);
   }
 
   Future<List> getkownUsersUidList() async {

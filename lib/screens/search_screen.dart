@@ -35,6 +35,13 @@ class _SearchScreenState extends State<SearchScreen> {
           decoration: const InputDecoration(
               labelText: 'Nhập tên người dùng cần tìm kiếm'),
           controller: searchController,
+          onChanged: (value) {
+            if (value.isEmpty) {
+              setState(() {
+                isShowUsers = false;
+              });
+            }
+          },
           onFieldSubmitted: (String s) {
             setState(() {
               isShowUsers = true;

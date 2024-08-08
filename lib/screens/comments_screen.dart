@@ -32,6 +32,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
     final User user = Provider.of<UserProvider>(context).getUser;
     commentController.text = userNameComment;
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         // leading: const Icon(Icons.arrow_back),
         backgroundColor: mobileBackgroundColor,

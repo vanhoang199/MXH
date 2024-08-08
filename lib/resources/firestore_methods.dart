@@ -264,28 +264,41 @@ class FirestoreMethods {
   //TODO: NOTI
   //text: Đăng bài -> postId không null
   //text: Theo dõi -> userId không null
-  cItemMessCollect(String sendUid, String sendUsername, String text,
-      String? postId, String? userId, String? username) async {
+  cItemMessCollect(String sendUid, String sendGmail, String photoUrl,
+      String text, String? postId, String? userId, String? userGmail) async {
     List<dynamic> listRecUid = await getListRecUid();
-    Map<String, bool> isChecked = {for (var item in listRecUid) item: true};
+    Map<String, bool> isChecked = {for (var item in listRecUid) item: false};
     List<String> docIds = listRecUid.map((e) => e.toString()).toList();
+    String messId = const Uuid().v1();
     await _firestore
         .collection('noti')
         .doc(sendUid)
         .collection('mess')
-        .doc()
+        .doc(messId)
         .set({
+      'messId': messId,
       'userId': userId ?? '',
-      'sendUserName': sendUsername,
+      'sendGmail': sendGmail,
+      'photoUrl': photoUrl,
       'text': text,
       'postId': postId ?? '',
       'sendId': FirebaseAuth.instance.currentUser!.uid,
-      'username': username ?? '',
+      'userGmail': userGmail ?? '',
       'time': Timestamp.now(),
       'isChecked': isChecked,
     });
 
     updateFieldInMultipleDocuments('users', docIds, 'hasNoti', true);
+  }
+
+  uItemMessCollection(
+      String sendUid, String messId, Map<String, dynamic> isChecked) async {
+    _firestore
+        .collection('noti')
+        .doc(sendUid)
+        .collection('mess')
+        .doc(messId)
+        .update({'isChecked': isChecked});
   }
 
   void updateFieldInMultipleDocuments(String collectionName,
@@ -324,15 +337,15 @@ class FirestoreMethods {
     }
 
     if (documentIds.isNotEmpty) {
-      for (var e in documentIds) {
+      for (var id in documentIds) {
         try {
           var snapshot = await _firestore
               .collection('noti')
-              .doc(e)
+              .doc(id)
               .collection('mess')
               .get();
-          for (var e in snapshot.docs) {
-            itemsBuildNotiUi.add(Noti.fromJson(e.data()));
+          for (var doc in snapshot.docs) {
+            itemsBuildNotiUi.add(Noti.fromJson(doc.data()));
           }
         } catch (e) {
           debugPrint(e.toString());

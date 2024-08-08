@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:instagram_clone_1/models/noti.dart';
-import 'package:instagram_clone_1/resources/firestore_methods.dart';
 import 'package:instagram_clone_1/screens/noti.dart';
 
 import 'package:instagram_clone_1/utlis/colors.dart';
@@ -26,12 +24,11 @@ class FeedScreen extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () async {
-              List<Noti> noti = await FirestoreMethods().getListNotiDetail();
               Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-                return NotiScreen(itemBuild: noti);
+                return const NotiScreen();
               }));
             },
-            icon: const Icon(Icons.heart_broken_sharp),
+            icon: const Icon(Icons.notifications),
           ),
           const IconButton(
             onPressed: null,

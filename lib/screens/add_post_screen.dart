@@ -1,16 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:instagram_clone_1/models/user.dart' as model_user;
 import 'package:instagram_clone_1/providers/user_provider.dart';
 import 'package:instagram_clone_1/resources/firestore_methods.dart';
-import 'package:instagram_clone_1/responsive/mobile_screen_layout.dart';
 import 'package:instagram_clone_1/utlis/colors.dart';
 import 'package:instagram_clone_1/utlis/utlis.dart';
 import 'package:provider/provider.dart';
-import 'package:uuid/uuid.dart';
 
 class AddPostScreen extends StatefulWidget {
   const AddPostScreen({super.key});
@@ -157,7 +154,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
                       if (postId != 'Lỗi') {
                         FirestoreMethods().cItemMessCollect(
                             FirebaseAuth.instance.currentUser!.uid,
-                            user.username,
+                            user.email,
+                            user.photoUrl,
                             'Đăng bài',
                             postId,
                             null,

@@ -57,7 +57,7 @@ class _SuggetFriendState extends State<SuggetFriend> {
                 var snapshotdata = snapshot.data!.docs;
                 if (snapshotdata.isNotEmpty) {
                   return SizedBox(
-                    height: MediaQuery.of(context).size.width * 0.35,
+                    height: MediaQuery.of(context).size.width * 0.3,
                     width: double.infinity,
                     child: ListView.builder(
                         scrollDirection: Axis.horizontal,
@@ -66,32 +66,27 @@ class _SuggetFriendState extends State<SuggetFriend> {
                           return Padding(
                             padding: const EdgeInsets.only(left: 8.0),
                             child: Container(
-                              width: MediaQuery.of(context).size.width * 0.35,
                               height: MediaQuery.of(context).size.width * 0.35,
                               decoration: BoxDecoration(
                                 border:
-                                    Border.all(color: Colors.white, width: 2),
+                                    Border.all(color: Colors.white, width: 0.5),
                               ),
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   CircleAvatar(
                                     backgroundImage: NetworkImage(
                                         snapshotdata[index]['photoUrl']),
                                   ),
-                                  Text(
-                                    snapshotdata[index]['username'],
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
+                                  Expanded(
+                                    child: Text(
+                                      snapshotdata[index]['username'],
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 10),
                                     ),
-                                  ),
-                                  const Text(
-                                    'Gợi ý cho bạn',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w300,
-                                        fontStyle: FontStyle.italic),
                                   ),
                                   InkWell(
                                     onTap: () {
@@ -101,11 +96,13 @@ class _SuggetFriendState extends State<SuggetFriend> {
                                             uid: snapshotdata[index]['uid']);
                                       }));
                                     },
-                                    child: const FollowButton(
-                                        backGroundColor: Colors.blue,
-                                        broderColor: Colors.white60,
-                                        text: 'Theo dõi người này',
-                                        textColor: Colors.white),
+                                    child: FollowButton(
+                                      backGroundColor: Colors.blue,
+                                      broderColor: Colors.white60,
+                                      text: 'Xem người dùng',
+                                      textColor: Colors.white,
+                                      fontsize: 10,
+                                    ),
                                   )
                                 ],
                               ),

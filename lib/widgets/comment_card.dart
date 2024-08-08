@@ -9,11 +9,13 @@ class CommentCard extends StatefulWidget {
   final snap;
   CollectionReference pathCollection;
   int dep;
+  double? rightPadding;
   CommentCard(
       {super.key,
       required this.snap,
       required this.pathCollection,
-      required this.dep});
+      required this.dep,
+      this.rightPadding});
   // final snap;
 
   @override
@@ -29,15 +31,18 @@ class _CommentCardState extends State<CommentCard> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    if (widget.dep == 0) {
-      getCountCmt();
-    }
-  }
-
-  void getCountCmt() async {
     setState(() {
       isLoading = true;
     });
+    if (widget.dep == 0) {
+      getCountCmt();
+    }
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  void getCountCmt() async {
     try {
       var replycollectionSnap = await widget.pathCollection
           .doc(widget.snap['commentId'])
@@ -49,9 +54,12 @@ class _CommentCardState extends State<CommentCard> {
     } catch (e) {
       debugPrint(e.toString());
     }
-    setState(() {
-      isLoading = false;
-    });
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
   }
 
   @override
@@ -59,7 +67,7 @@ class _CommentCardState extends State<CommentCard> {
     return isLoading
         ? const CircleAvatar()
         : Container(
-            padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+            padding: EdgeInsets.symmetric(horizontal: widget.rightPadding ?? 4),
             child: Column(
               children: [
                 Row(
@@ -121,26 +129,24 @@ class _CommentCardState extends State<CommentCard> {
                         ),
                       ),
                     ),
-                    Container(
-                      color: Colors.amber,
-                      child: const Icon(Icons.favorite),
-                    )
+                    // Container(
+                    //   color: Colors.amber,
+                    //   child: const Icon(Icons.favorite),
+                    // )
                   ],
                 ),
-                countCmt > 0
-                    ? isShowCmt
-                        ? Container()
-                        : (widget.dep == 0)
-                            ? InkWell(
-                                onTap: () {
-                                  setState(() {
-                                    isShowCmt = true;
-                                  });
-                                },
-                                child: Text('Hiển thị tất cả $countCmt'),
-                              )
-                            : Container()
-                    : Container(),
+                isShowCmt
+                    ? Container()
+                    : (widget.dep == 0)
+                        ? InkWell(
+                            onTap: () {
+                              setState(() {
+                                isShowCmt = true;
+                              });
+                            },
+                            child: Text('Hiển thị tất cả $countCmt'),
+                          )
+                        : Container(),
                 isShowCmt
                     ? StreamBuilder(
                         stream: widget.pathCollection
@@ -163,7 +169,6 @@ class _CommentCardState extends State<CommentCard> {
 
                           var replycommentDocs = snapshot.data!.docs;
                           return Container(
-                            color: Colors.white,
                             alignment: Alignment.topRight,
                             padding: const EdgeInsets.symmetric(vertical: 8)
                               ..copyWith(
@@ -176,18 +181,16 @@ class _CommentCardState extends State<CommentCard> {
                             child: ListView.builder(
                               itemCount: snapshot.data!.docs.length,
                               itemBuilder: (context, index) {
-                                return Container(
-                                  color: Colors.red,
-                                  child: CommentCard(
-                                    snap: replycommentDocs[index].data(),
-                                    pathCollection: widget.pathCollection
-                                        .doc(widget.snap['commentId'])
-                                        .collection('replycomment')
-                                        .doc(replycommentDocs[0]
-                                            .data()['commentId'])
-                                        .collection('replycomment1'),
-                                    dep: 1,
-                                  ),
+                                return CommentCard(
+                                  snap: replycommentDocs[index].data(),
+                                  pathCollection: widget.pathCollection
+                                      .doc(widget.snap['commentId'])
+                                      .collection('replycomment')
+                                      .doc(replycommentDocs[0]
+                                          .data()['commentId'])
+                                      .collection('replycomment1'),
+                                  dep: 1,
+                                  rightPadding: 16,
                                 );
                               },
                             ),

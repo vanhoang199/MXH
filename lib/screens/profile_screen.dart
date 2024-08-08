@@ -26,7 +26,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   int following = 0;
   bool isFollowing = false;
   bool isLoading = false;
-  bool isShowSuggetUser = true;
+  bool isShowSuggetUser = false;
   @override
   void initState() {
     super.initState();

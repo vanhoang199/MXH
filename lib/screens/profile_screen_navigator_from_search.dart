@@ -5,6 +5,7 @@ import 'package:instagram_clone_1/models/user.dart' as user_model;
 import 'package:instagram_clone_1/providers/user_provider.dart';
 import 'package:instagram_clone_1/resources/auth_methods.dart';
 import 'package:instagram_clone_1/resources/firestore_methods.dart';
+import 'package:instagram_clone_1/screens/chat_page_ver1.dart';
 import 'package:instagram_clone_1/screens/login_screen.dart';
 import 'package:instagram_clone_1/screens/post_screen.dart';
 import 'package:instagram_clone_1/utlis/colors.dart';
@@ -13,7 +14,9 @@ import 'package:provider/provider.dart';
 
 class ProfileScreenNavigatorFromSearch extends StatefulWidget {
   final String uid;
-  const ProfileScreenNavigatorFromSearch({super.key, required this.uid});
+  bool? isFollowing;
+  ProfileScreenNavigatorFromSearch(
+      {super.key, required this.uid, this.isFollowing});
 
   @override
   State<ProfileScreenNavigatorFromSearch> createState() =>
@@ -26,7 +29,7 @@ class _ProfileScreenNavigatorFromSearchState
   int postLen = 0;
   int followers = 0;
   int following = 0;
-  bool isFollowing = false;
+  late bool isFollowing;
   bool isLoading = false;
   @override
   void initState() {
@@ -52,9 +55,10 @@ class _ProfileScreenNavigatorFromSearchState
       userData = userSnap.data()!;
       followers = userSnap.data()!['followers'].length;
       following = userSnap.data()!['following'].length;
-      isFollowing = userSnap
-          .data()!['followers']
-          .contains(FirebaseAuth.instance.currentUser!.uid);
+      isFollowing = widget.isFollowing ??
+          userSnap
+              .data()!['followers']
+              .contains(FirebaseAuth.instance.currentUser!.uid);
 
       setState(() {});
     } catch (e) {
@@ -133,25 +137,48 @@ class _ProfileScreenNavigatorFromSearchState
                                               },
                                             )
                                           : isFollowing
-                                              ? FollowButton(
-                                                  text: 'Bỏ theo dõi',
-                                                  backGroundColor: Colors.white,
-                                                  textColor: Colors.black,
-                                                  broderColor: Colors.grey,
-                                                  function: () async {
-                                                    await FirestoreMethods()
-                                                        .followUser(
-                                                            FirebaseAuth
-                                                                .instance
-                                                                .currentUser!
-                                                                .uid,
-                                                            userData['uid']);
-                                                    setState(() {
-                                                      isFollowing = false;
-                                                      followers--;
-                                                    });
-                                                  },
-                                                )
+                                              ? Column(children: [
+                                                  FollowButton(
+                                                    text: 'Bỏ theo dõi',
+                                                    backGroundColor:
+                                                        Colors.white,
+                                                    textColor: Colors.black,
+                                                    broderColor: Colors.grey,
+                                                    function: () async {
+                                                      await FirestoreMethods()
+                                                          .followUser(
+                                                              FirebaseAuth
+                                                                  .instance
+                                                                  .currentUser!
+                                                                  .uid,
+                                                              userData['uid']);
+                                                      setState(() {
+                                                        isFollowing = false;
+                                                        followers--;
+                                                      });
+                                                    },
+                                                  ),
+                                                  FollowButton(
+                                                    backGroundColor:
+                                                        Colors.blue,
+                                                    broderColor: Colors.white,
+                                                    text: 'Nhắn tin',
+                                                    textColor: Colors.white,
+                                                    function: () {
+                                                      Navigator.of(context)
+                                                          .push(
+                                                              MaterialPageRoute(
+                                                                  builder: (_) {
+                                                        return ChatPageVer1(
+                                                            recevierUid:
+                                                                userData['uid'],
+                                                            recevierUserName:
+                                                                userData[
+                                                                    'username']);
+                                                      }));
+                                                    },
+                                                  )
+                                                ])
                                               : FollowButton(
                                                   text: 'Theo dõi',
                                                   backGroundColor: Colors.blue,
@@ -177,12 +204,12 @@ class _ProfileScreenNavigatorFromSearchState
                                                                 .instance
                                                                 .currentUser!
                                                                 .uid,
-                                                            user.username,
+                                                            user.email,
+                                                            user.photoUrl,
                                                             'Theo Dõi',
                                                             null,
                                                             userData['uid'],
-                                                            userData[
-                                                                'username']);
+                                                            userData['email']);
                                                     setState(() {
                                                       isFollowing = true;
                                                       followers++;
@@ -255,7 +282,7 @@ class _ProfileScreenNavigatorFromSearchState
                           child: Container(
                             child: Image(
                               image: NetworkImage(
-                                snap['postUrl'],
+                                snap['listPostImageUrl'][0],
                               ),
                               fit: BoxFit.cover,
                             ),

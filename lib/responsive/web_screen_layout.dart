@@ -33,7 +33,9 @@ class _WebScreenLayoutState extends State<WebScreenLayout> {
     User user = Provider.of<UserProvider>(context).getUser;
     return Scaffold(
       body: Center(
-        child: Text(user.username.isEmpty ? 'Đang Load' : user.username),
+        child: Text(user.username.isEmpty
+            ? 'Đang Load'
+            : 'Giao diện ứng dụng chưa hỗ trợ chế độ xoay ngang'),
       ),
     );
   }

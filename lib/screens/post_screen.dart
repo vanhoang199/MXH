@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:instagram_clone_1/screens/profile_screen_navigator_from_search.dart';
 import 'package:instagram_clone_1/widgets/post_card_multi_images.dart';
 
 class PostScreen extends StatefulWidget {
@@ -29,19 +28,6 @@ class _PostScreenState extends State<PostScreen> {
       appBar: AppBar(
         title: Text(
             'Bài đăng của ${currentUid == widget.uid ? 'tôi' : widget.userPost}'),
-        actions: currentUid == widget.uid
-            ? []
-            : [
-                IconButton(
-                    onPressed: () {
-                      Navigator.of(context)
-                          .push(MaterialPageRoute(builder: (_) {
-                        return ProfileScreenNavigatorFromSearch(
-                            uid: widget.uid);
-                      }));
-                    },
-                    icon: const Icon(Icons.arrow_forward_sharp))
-              ],
       ),
       body: StreamBuilder(
         stream: FirebaseFirestore.instance

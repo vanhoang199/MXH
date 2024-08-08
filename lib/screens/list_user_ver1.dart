@@ -23,7 +23,21 @@ class _ListUserVer1State extends State<ListUserVer1> {
         title: const Text('Danh sách bạn bè'),
         centerTitle: true,
         backgroundColor: mobileBackgroundColor,
+        actions: [
+          IconButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (_) => const AlertDialog(
+                      title: Text('Giải thích'),
+                      content: Text(
+                          '1, Bạn bè mới xem được lịch sử \n2, Kết bạn bằng cách theo dõi người dùng và người dùng đó theo dõi lại bạn')),
+                );
+              },
+              icon: const Icon(Icons.question_mark))
+        ],
       ),
+
       //body: _buildUserList(context),
       body: _buildUserList(context),
     );
@@ -173,13 +187,11 @@ class _ListUserVer1State extends State<ListUserVer1> {
               future: _chatService.getLastMessages(uid, _currentUserUid),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
-                  Text('_getLastMessages(): ${snapshot.error}');
+                  Text('Lấy dữ liệu: ${snapshot.error.toString()}');
                 }
 
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: Text('Đang lấy tin nhắn gần nhất'),
-                  );
+                  return const Text('Đang lấy tin nhắn gần nhất');
                 }
 
                 if (!snapshot.hasData) {

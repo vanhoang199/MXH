@@ -4,46 +4,44 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class Noti {
   String sendId;
-  String sendUserName;
+  String sendGmail;
   String text;
   String postId;
   Timestamp time;
   String userId;
-  String userName;
-  List isChecked;
+  String userGmail;
+  Map<String, dynamic> isChecked;
+  String photoUrl;
+  String messId;
   Noti(
       {required this.sendId,
-      required this.sendUserName,
+      required this.sendGmail,
       required this.text,
       required this.postId,
       required this.time,
       required this.userId,
-      required this.userName,
-      required this.isChecked});
-
-  static Noti fromSnap(DocumentSnapshot snap) {
-    var snapshot = snap.data() as Map<String, dynamic>;
-
-    return Noti(
-        postId: snapshot['postId'],
-        sendId: snapshot['sendId'],
-        sendUserName: snapshot['sendUserName'],
-        text: snapshot['text'],
-        time: snapshot['time'],
-        userId: snapshot['userId'],
-        userName: snapshot['username'],
-        isChecked: snapshot['isChecked']);
-  }
+      required this.userGmail,
+      required this.isChecked,
+      required this.photoUrl,
+      required this.messId});
 
   static Noti fromJson(Map<String, dynamic> json) {
+    json['isChecked'].runtimeType;
     return Noti(
         postId: json['postId'],
         sendId: json['sendId'],
-        sendUserName: json['sendUserName'],
+        sendGmail: json['sendGmail'],
         text: json['text'],
         time: json['time'],
         userId: json['userId'],
-        userName: json['username'],
-        isChecked: json['isChecked']);
+        userGmail: json['userGmail'],
+        isChecked: json['isChecked'],
+        photoUrl: json['photoUrl'],
+        messId: json['messId']);
+  }
+
+  bool getCheckState() {
+    String key = FirebaseAuth.instance.currentUser!.uid;
+    return isChecked[key] ?? false;
   }
 }
